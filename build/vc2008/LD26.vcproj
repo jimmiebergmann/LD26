@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../extlibs/SFML/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName)D.exe"
+				AdditionalDependencies="$(InputDir)\..\..\extlibs\SFML\lib\sfml-system-d.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-audio-d.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-graphics-d.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-window-d.lib"
+				OutputFile="$(OutDir)\$(ProjectName)-d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -116,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../extlibs/SFML/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -135,6 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="$(InputDir)\..\..\extlibs\SFML\lib\sfml-system.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-audio.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-graphics.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-window.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
