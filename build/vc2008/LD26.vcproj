@@ -170,10 +170,34 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath="..\..\source\Main.cpp"
+		<Filter
+			Name="Game"
 			>
-		</File>
+			<File
+				RelativePath="..\..\source\Game\Game.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Game\Game.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\source\Game\Main.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Engine"
+			>
+			<File
+				RelativePath="..\..\source\Engine\Window.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Engine\Window.hpp"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
