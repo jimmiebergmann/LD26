@@ -2,6 +2,7 @@
 #define __GAME_GAME_HPP__
 
 #include <Engine/Window.hpp>
+#include <Engine/Sprite.hpp>
 
 class Game
 {
@@ -25,6 +26,8 @@ private:
 
 	// Private variables
 	LDE::Window m_Window;
+	LDE::Image m_Image;
+	LDE::Sprite m_Sprite;
 
 };
 

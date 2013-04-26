@@ -190,6 +190,50 @@
 			Name="Engine"
 			>
 			<File
+				RelativePath="..\..\source\Engine\Audio.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Engine\Audio.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\source\Engine\Image.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Engine\Image.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\source\Engine\Input.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Engine\Input.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\source\Engine\Sprite.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Engine\Sprite.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\source\Engine\Timer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Engine\Timer.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Engine\Vector2.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\source\Engine\Window.cpp"
 				>
 			</File>

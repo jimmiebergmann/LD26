@@ -78,6 +78,11 @@ namespace LDE
 		return status;
 	}
 
+	bool Window::KeyIsDown(sf::Key::Code p_Code )
+	{
+		return true;
+	}
+
 	void Window::Show( )
 	{
 		m_sfWindow.Show( true );
@@ -86,6 +91,12 @@ namespace LDE
 	void Window::Hide( )
 	{
 		m_sfWindow.Show( false );
+	}
+
+	// Render functions
+	void Window::Render( Sprite p_Sprite )
+	{
+		m_sfWindow.Draw( p_Sprite.m_sfSprite );
 	}
 
 	// Get functions

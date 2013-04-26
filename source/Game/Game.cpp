@@ -1,4 +1,5 @@
 #include <Game/Game.hpp>
+#include <Engine/Timer.hpp>
 #include <iostream>
 
 // Constructors / destructors
@@ -17,14 +18,23 @@ int Game::Run( int p_Argc, char ** p_Argv )
 	// No errors? Let's run the game loop
 	if( Load( ) )
 	{
+		// Create a game timer
+		LDE::Timer timer;
+		timer.Start( );
+
+		// Loop until we break it
 		while( 1 )
 		{
-			double deltaTime = 1.0f / 60.0f;
+			// Get the delta time
+			timer.Stop( );
+			double deltaTime = timer.GetTime( );
+			//std::cout << 1.0f / deltaTime << " FPS." << std::endl;
+			timer.Start( );
 
 			// Update everything
 			if( Update( deltaTime ) != 0 )
 			{
-				std::cout << "ERROR!" << std::endl;
+				// Break the game loop
 				break;
 			}
 
@@ -49,19 +59,36 @@ int Game::Run( int p_Argc, char ** p_Argv )
 // Private functions
 bool Game::Load( )
 {
-
+	// Create the window
 	if( !m_Window.Create( 800, 600, 32, "LD26 Entry.", false ) )
 	{
 		std::cout << "[Game::Load] Can not create the window. " << std::endl;
 		return false;
 	}
 
+	// Load the image
+	if( !m_Image.Load( "Data/Textures/Test.png" ) )
+	{
+		std::cout << "[Game::Load] Can not load the image. " << std::endl;
+		return false;
+	}
+
+	// Load the sprite
+	if( !m_Sprite.Load( m_Image ) )
+	{
+		std::cout << "[Game::Load] Can not load the sprite. " << std::endl;
+		return false;
+	}
+
+	m_Sprite.SetPosition( LDE::Vector2f( 200, 200 ) );
+
+
 	return true;
 }
 
 void Game::Unload( )
 {
-
+	m_Window.Destroy( );
 }
 
 int Game::Update( double p_DeltaTime )
@@ -88,6 +115,17 @@ int Game::Update( double p_DeltaTime )
 		return 1;
 	}
 
+
+	// Update the sprtie
+	LDE::Vector2f spritePos = m_Sprite.GetPosition( );
+	m_Sprite.SetPosition( LDE::Vector2f( spritePos.x + ( 300.0f * p_DeltaTime ), spritePos.y ) );
+
+
+	// Test input
+
+	m_Window.KeyIsDown( sf::Key::Escape );
+
+
 	return 0;
 }
 
@@ -95,6 +133,9 @@ void Game::Render( )
 {
 	// Clear the screen
 	m_Window.ClearScreen( );
+
+	// Render everything
+	m_Window.Render( m_Sprite );
 
 
 	// Present the screen

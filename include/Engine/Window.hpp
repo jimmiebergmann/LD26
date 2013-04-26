@@ -2,6 +2,10 @@
 #define __LDE_WINDOW_HPP__
 
 #include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window/Input.hpp>
+#include <SFML/Window/Event.hpp>
+#include <Engine/Sprite.hpp>
 #include <string>
 
 namespace LDE
@@ -45,8 +49,12 @@ namespace LDE
 		void PresentScreen( );
 		void ClearScreen( );
 		bool PollEvent( Event & p_Event );
+		bool KeyIsDown( sf::Key::Code p_Code );
 		void Show( );
 		void Hide( );
+
+		// Render functions
+		void Render( Sprite  p_Sprite );
 
 		// Get functions
 		unsigned int GetWidth( ) const;
