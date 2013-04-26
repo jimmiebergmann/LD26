@@ -67,14 +67,14 @@ bool Game::Load( )
 	}
 
 	// Load the image
-	if( !m_Image.Load( "Data/Textures/Test.png" ) )
+	if( !m_Texture.Load( "Data/Textures/Test.png" ) )
 	{
 		std::cout << "[Game::Load] Can not load the image. " << std::endl;
 		return false;
 	}
 
 	// Load the sprite
-	if( !m_Sprite.Load( m_Image ) )
+	if( !m_Sprite.Load( m_Texture ) )
 	{
 		std::cout << "[Game::Load] Can not load the sprite. " << std::endl;
 		return false;
@@ -123,7 +123,7 @@ int Game::Update( double p_DeltaTime )
 
 	// Test input
 
-	m_Window.KeyIsDown( sf::Key::Escape );
+	//m_Window.KeyIsDown( sf::Key::Escape );
 
 
 	return 0;

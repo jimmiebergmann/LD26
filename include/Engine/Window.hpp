@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-#include <SFML/Window/Input.hpp>
+//#include <SFML/Window/Input.hpp>
 #include <SFML/Window/Event.hpp>
 #include <Engine/Sprite.hpp>
 #include <string>
@@ -19,7 +19,7 @@ namespace LDE
 		// Enums
 		enum Event
 		{
-			Closed = sf::Event::Closed,
+			Closed = sf::Event::Closed/*,
 			Resized = sf::Event::Resized, 
 			LostFocus = sf::Event::LostFocus, 
 			GainedFocus = sf::Event::GainedFocus, 
@@ -35,7 +35,7 @@ namespace LDE
 			JoyButtonPressed = sf::Event::JoyButtonPressed, 
 			JoyButtonReleased = sf::Event::JoyButtonReleased,
 			JoyMoved = sf::Event::JoyMoved,
-			Count = sf::Event::Count
+			Count = sf::Event::Count*/
 		};
 
 		// Constructors / destructors
@@ -49,7 +49,9 @@ namespace LDE
 		void PresentScreen( );
 		void ClearScreen( );
 		bool PollEvent( Event & p_Event );
-		bool KeyIsDown( sf::Key::Code p_Code );
+
+		//bool KeyIsDown( sf::Key::Code p_Code );
+		//bool ButtonIsDown( sf:: p_Code );
 		void Show( );
 		void Hide( );
 

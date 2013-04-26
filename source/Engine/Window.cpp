@@ -37,7 +37,7 @@ namespace LDE
 		}
 
 		// Create the window
-		m_sfWindow.Create( sf::VideoMode( p_Width, p_Height, p_Bits ),
+		m_sfWindow.create( sf::VideoMode( p_Width, p_Height, p_Bits ),
 			p_Title, windowStyle );
 
 		// Set the private variables
@@ -55,48 +55,48 @@ namespace LDE
 	void Window::Destroy( )
 	{
 		
-		m_sfWindow.Close( );
+		m_sfWindow.close( );
 		m_Created = false;
 	}
 
 	void Window::PresentScreen( )
 	{
-		m_sfWindow.Display( );
+		m_sfWindow.display( );
 	}
 
 	void Window::ClearScreen( )
 	{
-		m_sfWindow.Clear( );
+		m_sfWindow.clear( );
 	}
 
 	bool Window::PollEvent( Event & p_Event )
 	{
 		sf::Event e;
-		bool status = m_sfWindow.GetEvent( e );
-		p_Event = (Window::Event)( e.Type );
+		bool status = m_sfWindow.pollEvent( e );
+		p_Event = (Window::Event)( e.type );
 
 		return status;
 	}
-
-	bool Window::KeyIsDown(sf::Key::Code p_Code )
+/*
+	bool Window::KeyIsDown( sf::Key::Code p_Code )
 	{
 		return true;
-	}
+	}*/
 
 	void Window::Show( )
 	{
-		m_sfWindow.Show( true );
+		m_sfWindow.setVisible( true );
 	}
 
 	void Window::Hide( )
 	{
-		m_sfWindow.Show( false );
+		m_sfWindow.setVisible( false );
 	}
 
 	// Render functions
 	void Window::Render( Sprite p_Sprite )
 	{
-		m_sfWindow.Draw( p_Sprite.m_sfSprite );
+		m_sfWindow.draw( p_Sprite.m_sfSprite );
 	}
 
 	// Get functions

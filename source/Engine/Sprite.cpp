@@ -15,21 +15,21 @@ namespace LDE
 	}
 	
 	// Public general functions
-	bool Sprite::Load( Image & p_Image )
+	bool Sprite::Load( Texture & p_Texture )
 	{
 		if( m_Loaded )
 		{
 			return false;
 		}
 
-		// Load the sprite by using an image
-		if( !p_Image.IsLoaded( ) )
+		// Load the sprite by using an texture
+		if( !p_Texture.IsLoaded( ) )
 		{
 			std::cout << "[Sprite::Load] The image is not loaded." << std::endl;
 			return false;
 		}
 
-		m_sfSprite.SetImage( p_Image.m_sfImage );
+		m_sfSprite.setTexture( p_Texture.m_sfTexture );
 
 		m_Loaded = true;
 		return true;
@@ -61,13 +61,13 @@ namespace LDE
 	// Set functions
 	void Sprite::SetPosition( const Vector2f p_Position )
 	{
-		m_sfSprite.SetPosition( p_Position.x, p_Position.y );
+		m_sfSprite.setPosition( p_Position.x, p_Position.y );
 		m_Position = p_Position;
 	}
 
 	void Sprite::SetSize(  const Vector2f p_Size )
 	{
-		m_sfSprite.SetPosition( p_Size.x, p_Size.y );
+		m_sfSprite.setPosition( p_Size.x, p_Size.y );
 		m_Size = p_Size;
 	}
 

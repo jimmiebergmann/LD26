@@ -26,7 +26,7 @@ private:
 
 	// Private variables
 	LDE::Window m_Window;
-	LDE::Image m_Image;
+	LDE::Texture m_Texture;
 	LDE::Sprite m_Sprite;
 
 };

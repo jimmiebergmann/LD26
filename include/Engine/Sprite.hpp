@@ -2,7 +2,7 @@
 #define __LDE_SPRITE_HPP__
 
 #include <SFML/Graphics.hpp>
-#include <Engine/Image.hpp>
+#include <Engine/Texture.hpp>
 #include <Engine/Vector2.hpp>
 
 
@@ -20,7 +20,7 @@ namespace LDE
 		~Sprite( );
 		
 		// Public general functions
-		bool Load( Image & p_Image );
+		bool Load( Texture & p_Texture );
 		void Unload( );
 
 		// Get functions
