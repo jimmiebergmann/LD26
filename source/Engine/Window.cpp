@@ -40,6 +40,9 @@ namespace LDE
 		m_sfWindow.create( sf::VideoMode( p_Width, p_Height, p_Bits ),
 			p_Title, windowStyle );
 
+		// Enabble Vsync
+		m_sfWindow.setVerticalSyncEnabled( true );
+
 		// Set the private variables
 		m_Width = p_Width;
 		m_Height = p_Height;
@@ -91,6 +94,29 @@ namespace LDE
 	void Window::Hide( )
 	{
 		m_sfWindow.setVisible( false );
+	}
+
+	// Input functions
+	LDE::Vector2i Window::GetMousePositionLocal( )
+	{
+		sf::Vector2i p = sf::Mouse::getPosition();
+		return LDE::Vector2i( p.x, p.y );
+	}
+
+	LDE::Vector2i Window::GetMousePositionGlobal( )
+	{
+		sf::Vector2i p = sf::Mouse::getPosition( m_sfWindow );
+		return LDE::Vector2i( p.x, p.y );
+	}
+
+	bool Window::KeyIsDown( sf::Keyboard::Key p_Key )
+	{
+		return sf::Keyboard::isKeyPressed( p_Key );
+	}
+
+	bool KeyIsUp( sf::Keyboard::Key p_Key )
+	{
+		return !sf::Keyboard::isKeyPressed( p_Key );
 	}
 
 	// Render functions

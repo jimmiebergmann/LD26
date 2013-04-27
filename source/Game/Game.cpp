@@ -120,6 +120,12 @@ int Game::Update( double p_DeltaTime )
 	LDE::Vector2f spritePos = m_Sprite.GetPosition( );
 	m_Sprite.SetPosition( LDE::Vector2f( spritePos.x + ( 300.0f * p_DeltaTime ), spritePos.y ) );
 
+	if( m_Window.KeyIsDown( sf::Keyboard::A ) )
+	{
+		std::cout << "A" << std::endl;
+	}
+
+
 
 	// Test input
 

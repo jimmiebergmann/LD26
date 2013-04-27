@@ -1,11 +1,11 @@
 #ifndef __LDE_WINDOW_HPP__
 #define __LDE_WINDOW_HPP__
 
+#include <Engine/Sprite.hpp>
+#include <Engine/Vector2.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-//#include <SFML/Window/Input.hpp>
 #include <SFML/Window/Event.hpp>
-#include <Engine/Sprite.hpp>
 #include <string>
 
 namespace LDE
@@ -49,11 +49,14 @@ namespace LDE
 		void PresentScreen( );
 		void ClearScreen( );
 		bool PollEvent( Event & p_Event );
-
-		//bool KeyIsDown( sf::Key::Code p_Code );
-		//bool ButtonIsDown( sf:: p_Code );
 		void Show( );
 		void Hide( );
+
+		// Input functions
+		LDE::Vector2i GetMousePositionLocal( );
+		LDE::Vector2i GetMousePositionGlobal( );
+		bool KeyIsDown( sf::Keyboard::Key p_Key );
+		bool KeyIsUp( sf::Keyboard::Key p_Key );
 
 		// Render functions
 		void Render( Sprite  p_Sprite );
