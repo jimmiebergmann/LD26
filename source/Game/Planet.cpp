@@ -13,6 +13,10 @@ Planet::Planet( LDE::Vector2f p_Position, float p_Size, LDE::Texture * p_pTextur
 	m_Position( p_Position ),
 	m_Size( p_Size ),
 	m_pTexture( p_pTexture ),
+	m_Rotation( 0.0f ),
+	m_RotationSpeed( 0.0f ),
+	m_ResourcesMax( 1 ),
+	m_Resources( 1 ),
 	m_Loaded( false )
 {
 
@@ -56,6 +60,14 @@ void Planet::Update( double p_DeltaTime )
 	{
 		return;
 	}
+
+	// Rotate the planet
+	m_Rotation += m_RotationSpeed * p_DeltaTime;
+	if( m_Rotation > 360.0f )
+	{
+		m_Rotation -= 360.0f;
+	}
+	
 }
 
 void Planet::Render( )
@@ -64,6 +76,18 @@ void Planet::Render( )
 	{
 		return;
 	}
+
+	// Set up OGL for this
+	glLineWidth( 2 );
+
+	// Pull the matrix
+	glMatrixMode( GL_MODELVIEW );
+	glPushMatrix( );
+
+	// Rotate the planet around it's own center
+	glTranslatef( m_Position.x, m_Position.y, 0.0f );
+	glRotatef( m_Rotation, 0.0f, 0.0f, 1.0f );
+	glTranslatef( -m_Position.x, -m_Position.y, 0.0f );
 
 	// Render the planet
 	glEnable( GL_TEXTURE_2D );
@@ -77,6 +101,9 @@ void Planet::Render( )
 	glDisable( GL_TEXTURE_2D );
 	RenderFill( );
 
+
+	// Pull the matrix
+	glPopMatrix( );
 }
 
 // Set functions
@@ -97,6 +124,11 @@ void Planet::SetRotation( float p_Rotation )
 {
 	m_Rotation = p_Rotation;
 	//m_RenderQuad.SetRotation( m_Position );
+}
+
+void Planet::SetRotationSpeed( float p_Speed )
+{
+	m_RotationSpeed = p_Speed;
 }
 
 void Planet::SetColor( LDE::Color p_Color )
@@ -129,6 +161,17 @@ float Planet::GetRotation( ) const
 {
 	return m_Rotation;
 }
+
+float Planet::GetRotationSpeed( ) const
+{
+	return m_RotationSpeed;
+}
+
+LDE::Color Planet::GetColor( ) const
+{
+	return m_Color;
+}
+
 
 int Planet::GetResources( ) const
 {
@@ -185,11 +228,32 @@ void Planet::RenderFill( )
 				widths[ i ],
 				0.06f );
 
+			// Render a smooth line at the corner to make it smooth
+			float Size = m_Size * 2.0f;
+			LDE::Vector2f Pos = m_Position - LDE::Vector2f( m_Size, m_Size );
+			float y =  ( Size * (fl[ i ] + (heightPart * diff) ) ) + ( Size * 0.06f );
+			float x1 = Pos.x + ( Size * widths[ i ] );
+			float x2 = Pos.x + ( Size * ( 1.0f - widths[ i ] ) );
+			
+			// Render the line
+			glColor3f( GetColor( ).r / 255.0f, GetColor( ).g / 255.0f, GetColor( ).b / 255.0f );
+			glBegin( GL_LINES );
+				glVertex2f( x1, Pos.y + y );
+				glVertex2f( x2, Pos.y + y );
+			glEnd( );
+
 			// Break since we are done.
 			break;
 		}
 	}
 }
+
+/*
+
+	loat Size = m_Size * 2.0f;
+	Pos.y + ( Size * stopHeight ) + ( Size * rise )
+
+*/
 
 void Planet::RenderFillPart( float startHeight, float stopHeight,
 							float width, float rise )

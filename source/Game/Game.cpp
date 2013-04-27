@@ -89,6 +89,7 @@ bool Game::Load( )
 
 	// Set up opengl
 	glEnable( GL_TEXTURE_2D );
+	glEnable( GL_LINE_SMOOTH );
 	glClearColor( 39.0f / 255.0f, 43.0f / 255.0f, 47.0f / 255.0f, 0.0f );
 	glViewport( 0, 0, m_WindowSize.x, m_WindowSize.y );
 	glClear( GL_COLOR_BUFFER_BIT /* |GL_DEPTH_BUFFER_BIT */ );
@@ -125,13 +126,7 @@ bool Game::Load( )
 	m_pPlanet->SetColor( LDE::Color( 100, 171, 100 ) );
 	m_pPlanet->SetResourcesMax( 100 );
 	m_pPlanet->SetResources( 50 );
-
-	/*// Load the render quad
-	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
-	m_RenderQuad.SetVertHighCoo( m_Texture.GetSize( ) );
-	m_RenderQuad.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
-	m_RenderQuad.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
-*/
+	m_pPlanet->SetRotationSpeed( 30.0f );
 
 	// Clear all key inputs
 	ClearKeyStates( );
@@ -189,12 +184,14 @@ void Game::PollEvents( )
 
 int Game::Update( double p_DeltaTime )
 {
+	// /////////////////////////////////////////////
+	// INPUT
+
 	// Exit if we press Escape
 	if( KeyIsJustPressed( SDLK_ESCAPE ) )
 	{
 		return 1;
 	}
-
 
 	if( KeyIsDown( SDLK_a ) )
 	{
@@ -211,53 +208,12 @@ int Game::Update( double p_DeltaTime )
 		}
 	}
 
-	/*m_Window.Update( );
 
-	// Poll all the events
-	bool exit = false;
-	LDE::Window::Event e;
-	while( m_Window.PollEvent( e ) )
-	{
-		switch( e )
-		{
-		case LDE::Window::Closed:
-			exit = true;
-			break;
-		default:
-			break;
-		}
-	}
-*/
-/*
-	// Should we exit?
-	if( exit )
-	{
-		rturn 1;
-	}
-*/
-
-	// Update the sprtie
-	//LDE::Vector2f spritePos = m_Sprite.GetPosition( );
-	//m_Sprite.SetPosition( LDE::Vector2f( spritePos.x + ( 300.0f * p_DeltaTime ), spritePos.y ) );
-
-
-/*
-	if( m_Window.KeyIsJustPressed( sf::Keyboard::A ) )
-	{
-		m_pSound->Play( );
-	}
-*/
-
-
-/*
-	LDE::Vector2i mousePos = m_Window.GetMousePositionGlobal( );
-	std::cout << mousePos.x << "  " << mousePos.y << std::endl;
-*/
-
-	// Test input
-
-	//m_Window.KeyIsDown( sf::Key::Escape );
-
+	// //////////////////////////////////////////////////////////////
+	// Game update
+	
+	// Update the planet
+	m_pPlanet->Update( p_DeltaTime );
 
 	return 0;
 }
@@ -269,61 +225,6 @@ void Game::Render( )
 
 	// Render the planet
 	m_pPlanet->Render( );
-/*
-	glDisable( GL_TEXTURE_2D );
-	glDisable( GL_BLEND );
-	glDisable( GL_ALPHA_TEST );
-
-
-	glEnable( GL_DEPTH_TEST );
-
-
-	glAlphaFunc( GL_GREATER, 0 );
-
-	// Render test
-	glColor3f( 1.0f, 0.0f, 0.0f );
-	glBegin( GL_QUADS );
-	glVertex2f( 0.0f, 0.0f );
-	glVertex2f( 200.0f, 0.0f );
-	glVertex2f( 200.0f, 200.0f );
-	glVertex2f( 0.0f, 200.0f );
-	glEnd( );
-
-	//glDepthFunc( 
-
-	glAlphaFunc( GL_GREATER, 0 );
-
-	glColor3f( 0.0f, 1.0f, 0.0f );
-	glBegin( GL_QUADS );
-	glVertex3f( 100.0f, 100.0f, 0.5f );
-	glVertex3f( 300.0f, 100.0f, 0.5f );
-	glVertex3f( 300.0f, 300.0f, 0.5f );
-	glVertex3f( 100.0f, 300.0f, 0.5f );
-	glEnd( );*/
-
-
-	//m_Texture.Bind( );
-	//m_RenderQuad.Render( );
-/*
-	//glBindTexture( GL_TEXTURE_2D, m_Texture );
-	glBegin( GL_QUADS );
-
-	glTexCoord2f( 0.0f, 0.0f );
-	glVertex2f( 0.0f, 0.0f );
-
-	glTexCoord2f( 1.0f, 0.0f );
-	glVertex2f( 200.0f, 0.0f );
-
-	glTexCoord2f( 1.0f, 1.0f );
-	glVertex2f( 200.0f, 200.0f );
-
-	glTexCoord2f( 0.0f, 1.0f );
-	glVertex2f( 0.0f, 200.0f );
-*/
-
-
-	glEnd( );
-
 
 	// Swap all buffers
 	SDL_GL_SwapBuffers( );

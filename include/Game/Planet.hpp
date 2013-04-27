@@ -27,6 +27,7 @@ public:
 	void SetPosition( LDE::Vector2f p_Position );
 	void SetSize( float p_Size );
 	void SetRotation( float p_Rotation );
+	void SetRotationSpeed( float p_Speed );
 	void SetColor( LDE::Color p_Color );
 	void SetResources( int p_Resources );
 	void SetResourcesMax( int p_Resources );
@@ -35,6 +36,8 @@ public:
 	LDE::Vector2f GetPosition( ) const;
 	float GetSize( ) const;
 	float GetRotation( ) const;
+	float GetRotationSpeed( ) const;
+	LDE::Color GetColor( ) const;
 	int GetResources( ) const;
 	int GetResourcesMax( ) const;
 
@@ -52,6 +55,7 @@ private:
 	LDE::Color m_Color;
 	float m_Size;
 	float m_Rotation;
+	float m_RotationSpeed;
 	int m_Resources;
 	int m_ResourcesMax;
 	bool m_Loaded;
