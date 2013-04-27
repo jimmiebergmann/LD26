@@ -14,6 +14,8 @@ namespace LDE
 
 		Vector2( ) { }
 		Vector2( T p_X, T p_Y ) { x = p_X; y = p_Y; } 
+		Vector2( const Vector2<int> & V ) { x = static_cast<T>(V.x); y = static_cast<T>(V.y); } 
+		Vector2( const Vector2<float> & V ) { x = static_cast<T>(V.x); y = static_cast<T>(V.y); } 
 
 		const Vector2< T > operator = ( const Vector2< T > p_Vector )
 		{

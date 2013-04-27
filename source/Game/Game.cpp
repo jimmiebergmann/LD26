@@ -3,7 +3,10 @@
 #include <iostream>
 
 // Constructors / destructors
-Game::Game( )
+Game::Game( ) :
+	pSurface( NULL ),
+	pScreen( NULL ),
+	m_Running( false )
 {
 }
 
@@ -23,13 +26,17 @@ int Game::Run( int p_Argc, char ** p_Argv )
 		timer.Start( );
 
 		// Loop until we break it
-		while( 1 )
+		m_Running = true;
+		while( m_Running )
 		{
 			// Get the delta time
 			timer.Stop( );
 			double deltaTime = timer.GetTime( );
 			//std::cout << 1.0f / deltaTime << " FPS." << std::endl;
 			timer.Start( );
+
+			// Poll events
+			PollEvents( );
 
 			// Update everything
 			if( Update( deltaTime ) != 0 )
@@ -58,52 +65,89 @@ int Game::Run( int p_Argc, char ** p_Argv )
 // Private functions
 bool Game::Load( )
 {
-	// Create the window
-	if( !m_Window.Create( 800, 600, 32, "LD26 Entry.", false ) )
+	LDE::Vector2i windowSize( 1024, 720 );
+
+	// Initialize SDL IMPORTANT
+	if( SDL_Init( SDL_INIT_VIDEO ) != 0 )
 	{
-		std::cout << "[Game::Load] Can not create the window. " << std::endl;
+		std::cout << "[Game::Load( )] Unable to initialize SDL: " << SDL_GetError( ) << std::endl;
 		return false;
 	}
 
-	// Load the image
-	if( !m_Texture.Load( "Data/Textures/Test.png" ) )
+	// use OGL double buffer
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+	// Load the opengl SDL surface
+	if( (pSurface = SDL_SetVideoMode( windowSize.x, windowSize.y, 16, SDL_OPENGL /*| SDL_FULLSCREEN */ ) ) == NULL )
 	{
-		std::cout << "[Game::Load] Can not load the image. " << std::endl;
+		std::cout << "[Game::Load( )] Unable to set SDL surface: " << SDL_GetError( ) << std::endl;
 		return false;
 	}
 
-	// Load the sprite
-	if( !m_Sprite.Load( m_Texture ) )
+	// Set up opengl
+	glEnable( GL_TEXTURE_2D );
+	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+	glViewport( 0, 0, windowSize.x, windowSize.y );
+	glClear( GL_COLOR_BUFFER_BIT /* |GL_DEPTH_BUFFER_BIT */ );
+
+	// Enable alpha blending
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	glEnable( GL_BLEND );
+	glAlphaFunc( GL_GREATER, 0 );
+	glEnable( GL_ALPHA_TEST );
+
+	// Set up opengl matrices
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity( );
+	glOrtho( 0.0f, windowSize.x, 0.0f, windowSize.y, -1.0f, 1.0f );
+
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity( );
+
+	// Load a test texture
+	if( !m_Texture.Load( "Data/Textures/Test.BMP" ) )
 	{
-		std::cout << "[Game::Load] Can not load the sprite. " << std::endl;
+		std::cout << "[Game::Load( )] Unable to load the texture: " << SDL_GetError( ) << std::endl;
 		return false;
 	}
 
-	m_Sprite.SetPosition( LDE::Vector2f( 200, 200 ) );
-
-	// Load the sound
-	m_pSound = new LDE::Sound( );
-	if( !m_pSound->Load( "Data/Audio/Test.ogg", false ) )
-	{
-		std::cout << "[Game::Load] Can not load the sound. " << std::endl;
-		return false;
-	}
-
-	delete m_pSound;
-
-	
+	// Load the render quad
+	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_RenderQuad.SetVertHighCoo( m_Texture.GetSize( ) );
+	m_RenderQuad.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_RenderQuad.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
 
 	return true;
 }
 
 void Game::Unload( )
 {
-	m_Window.Destroy( );
+	// Unload the texture
+	m_Texture.Unload( );
+
+	// Close SDL
+	SDL_Quit();
+}
+
+void Game::PollEvents( )
+{
+	// Poll SDL event
+	SDL_Event e;
+	while( SDL_PollEvent( &e ) )
+	{
+		switch( e.type )
+		{
+		case SDL_QUIT:
+			m_Running = false;
+			break;
+		default: break;
+		}
+	}
 }
 
 int Game::Update( double p_DeltaTime )
 {
-	m_Window.Update( );
+	/*m_Window.Update( );
 
 	// Poll all the events
 	bool exit = false;
@@ -119,26 +163,26 @@ int Game::Update( double p_DeltaTime )
 			break;
 		}
 	}
-
-
+*/
+/*
 	// Should we exit?
 	if( exit )
 	{
-		return 1;
+		rturn 1;
 	}
-
+*/
 
 	// Update the sprtie
-	LDE::Vector2f spritePos = m_Sprite.GetPosition( );
-	m_Sprite.SetPosition( LDE::Vector2f( spritePos.x + ( 300.0f * p_DeltaTime ), spritePos.y ) );
+	//LDE::Vector2f spritePos = m_Sprite.GetPosition( );
+	//m_Sprite.SetPosition( LDE::Vector2f( spritePos.x + ( 300.0f * p_DeltaTime ), spritePos.y ) );
 
 
-
+/*
 	if( m_Window.KeyIsJustPressed( sf::Keyboard::A ) )
 	{
 		m_pSound->Play( );
 	}
-
+*/
 
 
 /*
@@ -156,13 +200,33 @@ int Game::Update( double p_DeltaTime )
 
 void Game::Render( )
 {
-	// Clear the screen
-	m_Window.ClearScreen( );
-
-	// Render everything
-	m_Window.Render( m_Sprite );
+	// Clear the buffers
+	glClear( GL_COLOR_BUFFER_BIT );
 
 
-	// Present the screen
-	m_Window.PresentScreen( );
+	m_Texture.Bind( );
+	m_RenderQuad.Render( );
+/*
+	//glBindTexture( GL_TEXTURE_2D, m_Texture );
+	glBegin( GL_QUADS );
+
+	glTexCoord2f( 0.0f, 0.0f );
+	glVertex2f( 0.0f, 0.0f );
+
+	glTexCoord2f( 1.0f, 0.0f );
+	glVertex2f( 200.0f, 0.0f );
+
+	glTexCoord2f( 1.0f, 1.0f );
+	glVertex2f( 200.0f, 200.0f );
+
+	glTexCoord2f( 0.0f, 1.0f );
+	glVertex2f( 0.0f, 200.0f );
+*/
+
+
+	glEnd( );
+
+
+	// Swap all buffers
+	SDL_GL_SwapBuffers( );
 }

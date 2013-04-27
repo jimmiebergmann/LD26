@@ -1,4 +1,52 @@
+//#include <SFML/Graphics.hpp>
+
+
 #include <Game/Game.hpp>
+
+int main( int argc, char *argv[] )
+{
+	Game game;
+	return game.Run( argc, argv );
+/*
+	// Surfaces
+	SDL_Surface * pSurface = NULL;
+	SDL_Surface * pScreen = NULL;
+
+
+	// Iniitilaize SDL
+	SDL_Init( SDL_INIT_EVERYTHING );
+
+	// Set up the sreen
+	pScreen = SDL_SetVideoMode( 800, 600, 32, SDL_SWSURFACE );
+
+	// Load the image
+	pSurface = SDL_LoadBMP( "Data/Textures/Test.bmp" );
+
+	// Blit the surface to the frame buffer
+	SDL_BlitSurface( pSurface, NULL, pScreen, NULL );
+
+	// Swap buffers
+	SDL_Flip( pScreen );
+
+	// Delay some time
+	SDL_Delay( 3000 );
+
+
+	// Unload everything
+	SDL_FreeSurface( pSurface );
+
+	// Quit SDL
+	SDL_Quit( );
+
+
+	return 0;*/
+}
+
+
+
+
+
+/*#include <Game/Game.hpp>
 #include <iostream>
 
 
@@ -8,6 +56,8 @@ int main( int argc, char ** argv )
 	return game.Run( argc, argv );
 
 }
+*/
+
 /*
  #include <SFML/Audio.hpp>
  #include <SFML/Graphics.hpp>

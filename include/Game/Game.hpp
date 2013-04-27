@@ -1,9 +1,18 @@
 #ifndef __GAME_GAME_HPP__
 #define __GAME_GAME_HPP__
 
+#include <SDL.h>
+#include <SDL_opengl.h>
+#include <Engine/RenderQuad.hpp>
+#include <Engine/Texture.hpp>
+#include <Engine/Vector2.hpp>
+
+//#include <SFML/Graphics.hpp>
+
+/*
 #include <Engine/Window.hpp>
-#include <Engine/Sprite.hpp>
-#include <Engine/Sound.hpp>
+#include <Engine/Sprite.hpp>*/
+//#include <Engine/Sound.hpp>
 
 class Game
 {
@@ -22,14 +31,16 @@ private:
 	// Private functions
 	bool Load( );
 	void Unload( );
+	void PollEvents( );
 	int Update( double p_DeltaTime );
 	void Render( );
 
 	// Private variables
-	LDE::Window m_Window;
+	SDL_Surface * pSurface;
+	SDL_Surface * pScreen;
+	LDE::RenderQuad m_RenderQuad;
 	LDE::Texture m_Texture;
-	LDE::Sprite m_Sprite;
-	LDE::Sound * m_pSound;
+	bool m_Running;
 
 };
 

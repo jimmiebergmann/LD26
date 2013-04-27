@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../extlibs/SFML/include"
+				AdditionalIncludeDirectories="../../include;../../extlibs/SDL/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(InputDir)\..\..\extlibs\SFML\lib\sfml-main-d.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-system-d.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-audio-d.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-graphics-d.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-window-d.lib"
+				AdditionalDependencies="$(InputDir)\..\..\extlibs\SDL\lib\x86\SDL.lib $(InputDir)\..\..\extlibs\SDL\lib\x86\SDLmain.lib opengl32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)-d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(InputDir)\..\..\extlibs\SFML\lib\sfml-main.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-system.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-audio.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-graphics.lib $(InputDir)\..\..\extlibs\SFML\lib\sfml-window.lib"
+				AdditionalDependencies="$(InputDir)\..\..\extlibs\SDL\lib\x86\SDL.lib $(InputDir)\..\..\extlibs\SDL\lib\x86\SDLmain.lib opengl32.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -190,19 +190,11 @@
 			Name="Engine"
 			>
 			<File
-				RelativePath="..\..\source\Engine\Sound.cpp"
+				RelativePath="..\..\source\Engine\RenderQuad.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Engine\Sound.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\source\Engine\Sprite.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Engine\Sprite.hpp"
+				RelativePath="..\..\include\Engine\RenderQuad.hpp"
 				>
 			</File>
 			<File
@@ -223,14 +215,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Engine\Vector2.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\source\Engine\Window.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Engine\Window.hpp"
 				>
 			</File>
 		</Filter>

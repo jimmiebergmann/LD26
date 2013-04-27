@@ -1,7 +1,8 @@
 #ifndef __LDE_TEXTURE_HPP__
 #define __LDE_TEXTURE_HPP__
 
-#include <SFML/Graphics.hpp>
+#include <SDL_opengl.h>
+#include <Engine/Vector2.hpp>
 #include <string>
 
 
@@ -21,25 +22,21 @@ namespace LDE
 		// Public general functions
 		bool Load( const std::string p_Path );
 		void Unload( );
+		void Bind( );
+		void Unbind( );
 
 		// Get functions
-		/*Vector2f GetPosition( ) const;
-		Vector2f GetSize( ) const;*/
+		Vector2i GetSize( ) const;
 		bool IsLoaded( ) const;
-
 
 	private:
 
 		// Private functions
 
 		// Private variables
-		sf::Texture m_sfTexture;
-		sf::Image m_sfImage;
-
+		GLuint m_Id;
+		LDE::Vector2i m_Size;
 		bool m_Loaded;
-
-
-
 
 	};
 
