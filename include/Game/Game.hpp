@@ -6,13 +6,7 @@
 #include <Engine/RenderQuad.hpp>
 #include <Engine/Texture.hpp>
 #include <Engine/Vector2.hpp>
-
-//#include <SFML/Graphics.hpp>
-
-/*
-#include <Engine/Window.hpp>
-#include <Engine/Sprite.hpp>*/
-//#include <Engine/Sound.hpp>
+#include <Game/Planet.hpp>
 
 class Game
 {
@@ -35,12 +29,25 @@ private:
 	int Update( double p_DeltaTime );
 	void Render( );
 
+	// Input functions
+	void ClearKeyStates( );
+	void UpdatePreKeyEvents( );
+	bool KeyIsDown( SDLKey p_Key );
+	bool KeyIsUp( SDLKey p_Key );
+	bool KeyIsJustPressed( SDLKey p_Key );
+	bool KeyIsJustReleased( SDLKey p_Key );
+
 	// Private variables
 	SDL_Surface * pSurface;
 	SDL_Surface * pScreen;
-	LDE::RenderQuad m_RenderQuad;
-	LDE::Texture m_Texture;
+	LDE::Vector2i m_WindowSize;
+	LDE::Texture m_PlanetTexture;
+	Planet * m_pPlanet;
 	bool m_Running;
+
+	// Input
+	bool m_CurrentKeyState[ SDLK_LAST ];
+	bool m_LastKeyState[ SDLK_LAST ];
 
 };
 

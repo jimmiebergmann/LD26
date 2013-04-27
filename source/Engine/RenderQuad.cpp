@@ -39,16 +39,20 @@ namespace LDE
 		glBegin( GL_QUADS );
 
 		glTexCoord2f( m_TexLowCoo.x, m_TexLowCoo.y );
-		glVertex2f( m_VertLowCoo.x, m_VertLowCoo.y );
+		glVertex2f( m_VertLowCoo.x + m_Position.x,
+			m_VertLowCoo.y + m_Position.y );
 
 		glTexCoord2f( m_TexHighCoo.x, m_TexLowCoo.y );
-		glVertex2f( m_VertHighCoo.x, m_VertLowCoo.y );
+		glVertex2f( m_VertHighCoo.x + m_Position.x,
+			m_VertLowCoo.y + m_Position.y );
 
 		glTexCoord2f( m_TexHighCoo.x, m_TexHighCoo.y );
-		glVertex2f( m_VertHighCoo.x, m_VertHighCoo.y );
+		glVertex2f( m_VertHighCoo.x + m_Position.x,
+			m_VertHighCoo.y + m_Position.y );
 
 		glTexCoord2f( m_TexLowCoo.x, m_TexHighCoo.y );
-		glVertex2f( m_VertLowCoo.x, m_VertHighCoo.y );
+		glVertex2f( m_VertLowCoo.x + m_Position.x,
+			m_VertHighCoo.y + m_Position.y );
 
 		glEnd( );
 	}
