@@ -81,6 +81,17 @@ bool Game::Load( )
 
 	m_Sprite.SetPosition( LDE::Vector2f( 200, 200 ) );
 
+	// Load the sound
+	m_pSound = new LDE::Sound( );
+	if( !m_pSound->Load( "Data/Audio/Test.ogg", false ) )
+	{
+		std::cout << "[Game::Load] Can not load the sound. " << std::endl;
+		return false;
+	}
+
+	delete m_pSound;
+
+	
 
 	return true;
 }
@@ -123,9 +134,9 @@ int Game::Update( double p_DeltaTime )
 
 
 
-	if( m_Window.KeyIsJustReleased( sf::Keyboard::A ) )
+	if( m_Window.KeyIsJustPressed( sf::Keyboard::A ) )
 	{
-		std::cout << "A" << std::endl;
+		m_pSound->Play( );
 	}
 
 

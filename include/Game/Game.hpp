@@ -3,6 +3,7 @@
 
 #include <Engine/Window.hpp>
 #include <Engine/Sprite.hpp>
+#include <Engine/Sound.hpp>
 
 class Game
 {
@@ -28,6 +29,7 @@ private:
 	LDE::Window m_Window;
 	LDE::Texture m_Texture;
 	LDE::Sprite m_Sprite;
+	LDE::Sound * m_pSound;
 
 };
 

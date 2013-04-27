@@ -190,11 +190,11 @@
 			Name="Engine"
 			>
 			<File
-				RelativePath="..\..\source\Engine\Audio.cpp"
+				RelativePath="..\..\source\Engine\Sound.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Engine\Audio.hpp"
+				RelativePath="..\..\include\Engine\Sound.hpp"
 				>
 			</File>
 			<File
