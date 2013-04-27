@@ -77,9 +77,10 @@ bool Game::Load( )
 
 	// use OGL double buffer
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	SDL_WM_SetCaption( "LD26", NULL );
 
 	// Load the opengl SDL surface
-	if( (pSurface = SDL_SetVideoMode( m_WindowSize.x, m_WindowSize.y, 32, SDL_OPENGL /*| SDL_FULLSCREEN */ ) ) == NULL )
+	if( (pSurface = SDL_SetVideoMode( m_WindowSize.x, m_WindowSize.y, 16, SDL_OPENGL /*| SDL_FULLSCREEN */ ) ) == NULL )
 	{
 		std::cout << "[Game::Load( )] Unable to set SDL surface: " << SDL_GetError( ) << std::endl;
 		return false;
@@ -108,15 +109,38 @@ bool Game::Load( )
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity( );
 
-	// Load a test texture
-	if( !m_PlanetTexture.Load( "Data/Textures/Test.BMP" ) )
+	// Load all the textures
+	if( !m_PlanetTexture.Load( "Data/Textures/Planet.BMP" ) )
 	{
 		std::cout << "[Game::Load( )] Unable to load the texture: " << SDL_GetError( ) << std::endl;
 		return false;
 	}
 
+	if( !m_SpacecraftTexture.Load( "Data/Textures/Spacecraft.BMP" ) )
+	{
+		std::cout << "[Game::Load( )] Unable to load the texture: " << SDL_GetError( ) << std::endl;
+		return false;
+	}
+
+	// Load the player
+	m_Player = Player( &m_SpacecraftTexture );
+	if( !m_Player.Load( ) )
+	{
+		std::cout << "[Game::Load( )] Unable to load the player" << std::endl;
+		return false;
+	}
+	m_Player.SetPosition( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_Player.SetDirection( LDE::Vector2f( 0.0f, 1.0f ) );
+	m_Player.SetColor( LDE::Color( 203, 203, 203 ) );
+	m_Player.SetMaxSpeed( 300.0f );
+	m_Player.SetRotationSpeed( 200.0f );
+
+	// Load the hook
+	m_Hook.SetLength( 300.0f );
+	m_Hook.SetColor( LDE::Color( 203, 203, 203 ) );
+
 	// Load the planet
-	m_pPlanet = new Planet( LDE::Vector2f( 0.0f, 0.0f ), m_PlanetTexture.GetSize( ).x / 2, &m_PlanetTexture );
+	m_pPlanet = new Planet( LDE::Vector2f( 0.0f, 0.0f ), m_PlanetTexture.GetSize( ).x / 1, &m_PlanetTexture );
 	if( !m_pPlanet->Load( ) )
 	{
 		std::cout << "[Game::Load( )] Unable to load the planet: " << SDL_GetError( ) << std::endl;
@@ -125,19 +149,19 @@ bool Game::Load( )
 	m_pPlanet->SetPosition( m_WindowSize / 2.0f );
 	m_pPlanet->SetColor( LDE::Color( 100, 171, 100 ) );
 	m_pPlanet->SetResourcesMax( 100 );
-	m_pPlanet->SetResources( 50 );
+	m_pPlanet->SetResources( 100 );
 	m_pPlanet->SetRotationSpeed( 30.0f );
 
 	// Clear all key inputs
 	ClearKeyStates( );
-
 
 	return true;
 }
 
 void Game::Unload( )
 {
-	// Unload the texture
+	// Unload the textures
+	m_SpacecraftTexture.Unload( );
 	m_PlanetTexture.Unload( );
 
 	// Unload the planet
@@ -193,27 +217,90 @@ int Game::Update( double p_DeltaTime )
 		return 1;
 	}
 
+	if( KeyIsDown( SDLK_w ) )
+	{
+		m_Player.BurstForwards( );
+	}
+	else if( KeyIsDown( SDLK_s ) )
+	{
+		m_Player.BurstBackwards( );
+	}
 	if( KeyIsDown( SDLK_a ) )
+	{
+		m_Player.BurstLeft( );
+	}
+	else if( KeyIsDown( SDLK_d ) )
+	{
+		m_Player.BurstRight( );
+	}
+
+	// Shooting the hook
+	if( KeyIsDown( SDLK_SPACE ) )
+	{
+		LDE::Vector2f HookPosition = m_Player.GetPosition( );
+		HookPosition += m_Player.GetViewDirection( ) * m_Player.GetSize( ).y / 2.1f;
+
+		m_Hook.SetPosition( HookPosition  );
+		m_Hook.Fire( m_Player.GetViewDirection( ) );
+	}
+
+
+	
+	// Fill test
+	if( KeyIsDown( SDLK_z ) )
 	{
 		if( m_pPlanet->GetResources( ) != m_pPlanet->GetResourcesMax( ) )
 		{
 			m_pPlanet->SetResources( m_pPlanet->GetResources( ) + 1 );
 		}
 	}
-	else if( KeyIsDown( SDLK_s ) )
+	else if( KeyIsDown( SDLK_x ) )
 	{
 		if( m_pPlanet->GetResources( ) != 0 )
 		{
 			m_pPlanet->SetResources( m_pPlanet->GetResources( ) - 1 );
 		}
 	}
+	
 
 
 	// //////////////////////////////////////////////////////////////
 	// Game update
-	
+
+	// Update the player
+	m_Player.Update( p_DeltaTime );
+
+	// Update the hook
+	LDE::Vector2f HookPosition = m_Player.GetPosition( );
+	HookPosition += m_Player.GetViewDirection( ) * m_Player.GetSize( ).y / 2.1f;
+
+	m_Hook.SetPosition( HookPosition  );
+	m_Hook.Update( p_DeltaTime );
+
 	// Update the planet
 	m_pPlanet->Update( p_DeltaTime );
+
+	// Add planet gravity if we are close enought
+	LDE::Vector2f planetDirection = m_pPlanet->GetPosition( ) - m_Player.GetPosition( );
+	float planetDistance = planetDirection.Magnitude( );
+	const float planetGravityStart = m_pPlanet->GetSize( ) * 4.5f;
+
+	if( planetDistance <= planetGravityStart )
+	{
+		float gravityPower = 1.0f - ( planetDistance / planetGravityStart );
+		
+		
+		LDE::Vector2f gravityVector = planetDirection.Normal( ) *
+			gravityPower * (m_pPlanet->GetSize( ) / 50.0f );
+
+		m_Player.SetDirection( m_Player.GetDirection( ) + gravityVector );
+		
+		//std::cout << gravityPower << std::endl;
+	}
+
+	
+
+	//std::cout << planetDistance << std::endl;
 
 	return 0;
 }
@@ -222,6 +309,19 @@ void Game::Render( )
 {
 	// Clear the buffers
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity( );
+
+	// Set up the camera
+	LDE::Vector2f cameraDiff = m_Player.GetPosition( ) - ( LDE::Vector2f( m_WindowSize ) / 2.0f );
+	glTranslatef( -cameraDiff.x, -cameraDiff.y, 0.0f );
+	
+	// Render the player
+	m_Player.Render( );
+
+	// Render the hook
+	m_Hook.Render( );
 
 	// Render the planet
 	m_pPlanet->Render( );

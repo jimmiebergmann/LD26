@@ -190,15 +190,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\source\Game\Hook.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Game\Hook.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\source\Game\Main.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\source\Game\Object.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Game\Object.hpp"
 				>
 			</File>
 			<File
@@ -255,6 +255,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Engine\Timer.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Engine\Utility.hpp"
 				>
 			</File>
 			<File

@@ -6,7 +6,10 @@
 #include <Engine/RenderQuad.hpp>
 #include <Engine/Texture.hpp>
 #include <Engine/Vector2.hpp>
+#include <Game/Player.hpp>
+#include <Game/Hook.hpp>
 #include <Game/Planet.hpp>
+#include <vector>
 
 class Game
 {
@@ -42,6 +45,9 @@ private:
 	SDL_Surface * pScreen;
 	LDE::Vector2i m_WindowSize;
 	LDE::Texture m_PlanetTexture;
+	LDE::Texture m_SpacecraftTexture;
+	Player m_Player;
+	Hook m_Hook;
 	Planet * m_pPlanet;
 	bool m_Running;
 
