@@ -198,14 +198,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\source\Engine\Input.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Engine\Input.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\source\Engine\Sprite.cpp"
 				>
 			</File>

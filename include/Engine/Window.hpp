@@ -46,6 +46,7 @@ namespace LDE
 		bool Create( const unsigned int p_Width, const unsigned int p_Height,
 			const unsigned int p_Bits, std::string p_Title, const bool p_Fullscreen );
 		void Destroy( );
+		void Update( );
 		void PresentScreen( );
 		void ClearScreen( );
 		bool PollEvent( Event & p_Event );
@@ -57,6 +58,8 @@ namespace LDE
 		LDE::Vector2i GetMousePositionGlobal( );
 		bool KeyIsDown( sf::Keyboard::Key p_Key );
 		bool KeyIsUp( sf::Keyboard::Key p_Key );
+		bool KeyIsJustPressed( sf::Keyboard::Key p_Key );
+		bool KeyIsJustReleased( sf::Keyboard::Key p_Key );
 
 		// Render functions
 		void Render( Sprite  p_Sprite );
@@ -69,6 +72,9 @@ namespace LDE
 
 	private:
 
+		// private functions
+		void UpdatePreInputs( );
+
 		// Private variables
 		sf::RenderWindow m_sfWindow;
 		unsigned int m_Width;
@@ -77,6 +83,10 @@ namespace LDE
 		std::string m_Title;
 		bool m_Fullscreen;
 		bool m_Created;
+
+		// Input varaibles
+		bool m_curKeys[ sf::Keyboard::KeyCount ];
+		bool m_prevKeys[ sf::Keyboard::KeyCount ];
 
 	};
 

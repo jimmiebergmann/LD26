@@ -40,7 +40,6 @@ int Game::Run( int p_Argc, char ** p_Argv )
 
 			//Render everything in the window
 			Render( );
-
 		}
 	}
 	// We couldn't load the game
@@ -93,6 +92,7 @@ void Game::Unload( )
 
 int Game::Update( double p_DeltaTime )
 {
+	m_Window.Update( );
 
 	// Poll all the events
 	bool exit = false;
@@ -109,6 +109,7 @@ int Game::Update( double p_DeltaTime )
 		}
 	}
 
+
 	// Should we exit?
 	if( exit )
 	{
@@ -120,12 +121,19 @@ int Game::Update( double p_DeltaTime )
 	LDE::Vector2f spritePos = m_Sprite.GetPosition( );
 	m_Sprite.SetPosition( LDE::Vector2f( spritePos.x + ( 300.0f * p_DeltaTime ), spritePos.y ) );
 
-	if( m_Window.KeyIsDown( sf::Keyboard::A ) )
+
+
+	if( m_Window.KeyIsJustReleased( sf::Keyboard::A ) )
 	{
 		std::cout << "A" << std::endl;
 	}
 
 
+
+/*
+	LDE::Vector2i mousePos = m_Window.GetMousePositionGlobal( );
+	std::cout << mousePos.x << "  " << mousePos.y << std::endl;
+*/
 
 	// Test input
 

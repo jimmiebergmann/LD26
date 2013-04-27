@@ -12,7 +12,11 @@ namespace LDE
 		m_Fullscreen( false ),
 		m_Created( false )
 	{
-		
+		for( unsigned int i = 0; i < sf::Keyboard::KeyCount; i++ )
+		{
+			m_curKeys[ i ] = false;
+			m_prevKeys[ i ] = false;
+		}
 	}
 
 	Window::~Window( )
@@ -38,10 +42,10 @@ namespace LDE
 
 		// Create the window
 		m_sfWindow.create( sf::VideoMode( p_Width, p_Height, p_Bits ),
-			p_Title, windowStyle );
+			p_Title );
 
 		// Enabble Vsync
-		m_sfWindow.setVerticalSyncEnabled( true );
+		//m_sfWindow.setVerticalSyncEnabled( true );
 
 		// Set the private variables
 		m_Width = p_Width;
@@ -62,6 +66,11 @@ namespace LDE
 		m_Created = false;
 	}
 
+	void Window::Update( )
+	{
+		UpdatePreInputs( );
+	}
+
 	void Window::PresentScreen( )
 	{
 		m_sfWindow.display( );
@@ -80,11 +89,6 @@ namespace LDE
 
 		return status;
 	}
-/*
-	bool Window::KeyIsDown( sf::Key::Code p_Code )
-	{
-		return true;
-	}*/
 
 	void Window::Show( )
 	{
@@ -106,17 +110,29 @@ namespace LDE
 	LDE::Vector2i Window::GetMousePositionGlobal( )
 	{
 		sf::Vector2i p = sf::Mouse::getPosition( m_sfWindow );
-		return LDE::Vector2i( p.x, p.y );
+		return LDE::Vector2i( p.x, m_Height - p.y );
 	}
 
 	bool Window::KeyIsDown( sf::Keyboard::Key p_Key )
 	{
-		return sf::Keyboard::isKeyPressed( p_Key );
+		return ( m_curKeys[ p_Key ] = sf::Keyboard::isKeyPressed( p_Key ) );
 	}
 
-	bool KeyIsUp( sf::Keyboard::Key p_Key )
+	bool Window::KeyIsUp( sf::Keyboard::Key p_Key )
 	{
-		return !sf::Keyboard::isKeyPressed( p_Key );
+		return !( m_curKeys[ p_Key ] = sf::Keyboard::isKeyPressed( p_Key ) );
+	}
+
+	bool Window::KeyIsJustPressed( sf::Keyboard::Key p_Key )
+	{
+		return ( m_curKeys[ p_Key ] = sf::Keyboard::isKeyPressed( p_Key ) ) &&
+			!m_prevKeys[ p_Key ];
+	}
+
+	bool Window::KeyIsJustReleased( sf::Keyboard::Key p_Key )
+	{
+		return !( m_curKeys[ p_Key ] = sf::Keyboard::isKeyPressed( p_Key ) ) &&
+			m_prevKeys[ p_Key ];
 	}
 
 	// Render functions
@@ -144,6 +160,17 @@ namespace LDE
 	std::string Window::GetTitle( ) const
 	{
 		return m_Title;
+	}
+
+	// private functions
+	void Window::UpdatePreInputs( )
+	{
+		// SLOW AND LAZY!
+		for( unsigned int i = 0; i < sf::Keyboard::KeyCount; i++ )
+		{
+			m_prevKeys[ i ] = m_curKeys[ i ];
+			m_curKeys[ i ] = false;
+		}
 	}
 
 }
