@@ -9,6 +9,7 @@ Game::Game( ) :
 	pScreen( NULL ),
 	m_CurrPlanet( ) ,
 	m_ActiveLazer( false ),
+	m_OverlayAlpha( 0.0f ),
 	m_Running( false )
 {
 }
@@ -129,6 +130,19 @@ bool Game::Load( )
 		return false;
 	}
 
+	if( !m_OverlayTexture.Load( "Data/Textures/Overlay.BMP" ) )
+	{
+		std::cout << "[Game::Load( )] Unable to load the texture: " << SDL_GetError( ) << std::endl;
+		return false;
+	}
+
+	// Load the overlay quad
+	m_OverlayQuad.SetPosition( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_OverlayQuad.SetVertLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_OverlayQuad.SetVertHighCoo( m_WindowSize );
+	m_OverlayQuad.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_OverlayQuad.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
+
 	// Load the player
 	m_Player = Player( &m_SpacecraftTexture );
 	if( !m_Player.Load( ) )
@@ -171,7 +185,7 @@ void Game::LoadStartValues( )
 	m_StartPlayerDirection = LDE::Vector2f( 0.0f, 1.0f );
 	m_StartPlayerColor = LDE::Color( 203, 203, 203 );
 	m_StartPlayerRadius = 15.0f;
-	m_StartPumpSpeed = 1.0f;
+	m_StartPumpSpeed = 0.08f;
 	m_StartBulletSpeed = 300.0f;
 	m_StartMaxPlanetRange = 1000.0f;
 
@@ -185,19 +199,19 @@ void Game::LoadStartValues( )
 	m_StartPlanetThicknesses[ 0 ] = 50;
 
 	m_StartPlanetSizes[ 1 ] = 200;
-	m_StartPlanetThicknesses[ 1 ] = 50;
+	m_StartPlanetThicknesses[ 1 ] = 40;
 
-	m_StartPlanetSizes[ 2 ] = 150;
-	m_StartPlanetThicknesses[ 2 ] = 50;
+	m_StartPlanetSizes[ 2 ] = 160;
+	m_StartPlanetThicknesses[ 2 ] = 25;
 
 	m_StartPlanetMaxResources[ 0 ] = 1.0f;
 	m_StartPlanetMaxResources[ 1 ] = 1.0f;
 	m_StartPlanetMaxResources[ 2 ] = 1.0f;
 
 	
-	m_StartPlanetRotationSpeed[ 0 ] = 40.0f;
-	m_StartPlanetRotationSpeed[ 1 ] = 120.0f;
-	m_StartPlanetRotationSpeed[ 2 ] = 140.0f;
+	m_StartPlanetRotationSpeed[ 0 ] = 30.0f;
+	m_StartPlanetRotationSpeed[ 1 ] = 40.0f;
+	m_StartPlanetRotationSpeed[ 2 ] = 50.0f;
 	
 /*
 	m_StartPlanetRotationSpeed[ 0 ] = 0.0f;
@@ -232,6 +246,7 @@ void Game::Unload( )
 	// Unload the textures
 	m_SpacecraftTexture.Unload( );
 	m_PlanetTexture.Unload( );
+	m_OverlayTexture.Unload( );
 
 	// Clear all the pumps
 	ClearAllPumpBullets( );
@@ -329,7 +344,7 @@ int Game::Update( double p_DeltaTime )
 			
 			}
 			// Shoot lazer
-			else
+			else if( m_Planets[ m_CurrPlanet ].IsPumpActive( ) )
 			{
 				m_ActiveLazer = true;
 			}
@@ -452,15 +467,27 @@ int Game::Update( double p_DeltaTime )
 	{
 		// We died!
 		ResetGame( );
+		return 0;
 	}
 	//std::cout << pumpPosition.x << "   " << pumpPosition.y << std::endl;
 
 	// Are we outside the navigation system? Then reset
-	if( planetDistance >= m_StartMaxPlanetRange )
+	if( planetDistance >= m_StartMaxPlanetRange + m_Planets[ m_CurrPlanet ].GetSize( ) )
 	{
 		// We are lost!
 		ResetGame( );
+		return 0;
 	}
+
+	// Update the overlay alpha which is depending on the planet distance
+	const float distMaxSurface = m_StartMaxPlanetRange + m_Planets[ m_CurrPlanet ].GetSize( );
+	const float distToSurface = planetDistance - m_Planets[ m_CurrPlanet ].GetSize( );
+	const float minOffset = distToSurface / 2.0f;
+	const float maxOffset = distToSurface;
+	const float offsetDiff1 = minOffset / distToSurface;
+	const float offsetDiff2 = 1.0f / offsetDiff1;
+	m_OverlayAlpha = ((distToSurface / distMaxSurface ) * offsetDiff2 ) - offsetDiff1;
+	m_OverlayAlpha = std::max( 0.0f, m_OverlayAlpha );
 
 	// Is the current planet out of resources?
 	if( m_Planets[ m_CurrPlanet ].GetResources( ) == 0 )
@@ -471,7 +498,6 @@ int Game::Update( double p_DeltaTime )
 
 			// Set the planet's start position to the pump's position
 			m_Planets[ m_CurrPlanet ].SetPosition( pumpPosition );
-			m_Player.SetColor( m_Planets[ m_CurrPlanet - 1 ].GetColor( ) );
 
 		}
 	}
@@ -517,6 +543,7 @@ void Game::Render( )
 		glColor3f( m_Player.GetColor( ).r / 255.0f,
 			m_Player.GetColor( ).g / 255.0f, m_Player.GetColor( ).b / 255.0f );
 
+		glLineWidth( 4.0f );
 		glBegin( GL_LINES );
 			glVertex2f( m_LazerPoints[ 0 ].x, m_LazerPoints[ 0 ].y );
 			glVertex2f( m_LazerPoints[ 1 ].x, m_LazerPoints[ 1 ].y );
@@ -525,10 +552,15 @@ void Game::Render( )
 
 	glPopMatrix( );
 
+	glEnable( GL_TEXTURE_2D );
+	glColor4f( 1.0f, 1.0f, 1.0f, m_OverlayAlpha );
+	m_OverlayTexture.Bind( );
+	m_OverlayQuad.Render( );
+	glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
 	// ///////////////////////////////////////////////////////
 	// Render a navigation system
-	static const LDE::Vector2f navSize( 160.0f, 60.0f );
+	/*static const LDE::Vector2f navSize( 160.0f, 60.0f );
 	glLineWidth( 2.0f );
 	glPointSize( 6.0f );
 	glPushMatrix( );
@@ -550,12 +582,13 @@ void Game::Render( )
 	diff /= LDE::Vector2f( m_StartMaxPlanetRange, m_StartMaxPlanetRange );
 	diff *= navSize / 2.0f;
 	
+	// Render the navigation points
 	glBegin( GL_POINTS );
 		glVertex2f( diff.x, 0.0f );
 		glVertex2f( 0.0f, diff.y );
 	glEnd( );
 
-	glPopMatrix( );
+	glPopMatrix( );*/
 
 
 	// Swap all buffers
@@ -566,6 +599,7 @@ void Game::ResetGame( )
 {
 	SetPlanetValues( );
 	ClearAllPumpBullets( );
+	ClearKeyStates( );
 
 	// Reset the player
 	m_Player.SetPosition( m_StartPlayerPosition );
@@ -573,6 +607,7 @@ void Game::ResetGame( )
 	m_Player.SetDirection( LDE::Vector2f( 0.0f, 0.0f ) );
 	m_Player.SetRotation( 0.0f );
 	m_Player.SetColor( m_StartPlayerColor );
+	m_ActiveLazer = false;
 }
 
 // Input functions
@@ -624,7 +659,7 @@ void Game::UpdatePumpBullets( double p_DeltaTime )
 		// Remove the bullet if it's too far away from the player
 		float distance = LDE::Vector2f( m_Player.GetPosition( ) -
 			(*it)->GetPosition( ) ).Magnitude( );
-		if ( distance >= 1500.0f )
+		if ( distance >= 1000.0f )
 		{
 			// erase returns the new iterator
 			it = m_PumpBullets.erase(it);

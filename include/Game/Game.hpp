@@ -56,6 +56,9 @@ private:
 	LDE::Vector2i m_WindowSize;
 	LDE::Texture m_PlanetTexture;
 	LDE::Texture m_SpacecraftTexture;
+	LDE::Texture m_OverlayTexture;
+	LDE::RenderQuad m_OverlayQuad;
+	float m_OverlayAlpha;
 	Player m_Player;
 	Hook m_Hook;
 	std::vector<PumpBullet*> m_PumpBullets;
