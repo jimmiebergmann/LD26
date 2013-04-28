@@ -171,7 +171,7 @@ void Game::LoadStartValues( )
 	m_StartPlayerDirection = LDE::Vector2f( 0.0f, 1.0f );
 	m_StartPlayerColor = LDE::Color( 203, 203, 203 );
 	m_StartPlayerRadius = 15.0f;
-	m_StartPumpSpeed = 100.0f;
+	m_StartPumpSpeed = 1.0f;
 	m_StartBulletSpeed = 300.0f;
 	m_StartMaxPlanetRange = 1000.0f;
 
@@ -190,9 +190,9 @@ void Game::LoadStartValues( )
 	m_StartPlanetSizes[ 2 ] = 150;
 	m_StartPlanetThicknesses[ 2 ] = 50;
 
-	m_StartPlanetMaxResources[ 0 ] = 100;
-	m_StartPlanetMaxResources[ 1 ] = 80;
-	m_StartPlanetMaxResources[ 2 ] = 60;
+	m_StartPlanetMaxResources[ 0 ] = 1.0f;
+	m_StartPlanetMaxResources[ 1 ] = 1.0f;
+	m_StartPlanetMaxResources[ 2 ] = 1.0f;
 
 	
 	m_StartPlanetRotationSpeed[ 0 ] = 40.0f;
@@ -217,8 +217,8 @@ void Game::SetPlanetValues( )
 		m_Planets[ i ].SetColor( m_StartPlanetColors[ i ] );
 		m_Planets[ i ].SetSize( m_StartPlanetSizes[ i ] );
 		m_Planets[ i ].SetResources( m_StartPlanetMaxResources[ i ] );
-		m_Planets[ i ].SetResourcesMax( m_StartPlanetMaxResources[ i ] );
-		m_Planets[ i ].SetPumpMaxResources( m_StartPlanetMaxResources[ i ] );
+		//m_Planets[ i ].SetResourcesMax( m_StartPlanetMaxResources[ i ] );
+		//m_Planets[ i ].SetPumpMaxResources( m_StartPlanetMaxResources[ i ] );
 		m_Planets[ i ].SetRotationSpeed( m_StartPlanetRotationSpeed[ i ] );
 		m_Planets[ i ].SetThickness( m_StartPlanetThicknesses[ i ] );
 		m_Planets[ i ].SetPumpSpeed( m_StartPumpSpeed );
@@ -340,16 +340,16 @@ int Game::Update( double p_DeltaTime )
 	// Fill test
 	if( KeyIsDown( SDLK_z ) )
 	{
-		if( m_Planets[ m_CurrPlanet ].GetResources( ) != m_Planets[ m_CurrPlanet ].GetResourcesMax( ) )
+		if( m_Planets[ m_CurrPlanet ].GetResources( ) != 1.0f )
 		{
-			m_Planets[ m_CurrPlanet ].SetResources( m_Planets[ m_CurrPlanet ].GetResources( ) + 1 );
+			m_Planets[ m_CurrPlanet ].SetResources( m_Planets[ m_CurrPlanet ].GetResources( ) + ( 0.25f * p_DeltaTime) );
 		}
 	}
 	else if( KeyIsDown( SDLK_x ) )
 	{
-		if( m_Planets[ m_CurrPlanet ].GetResources( ) != 0 )
+		if( m_Planets[ m_CurrPlanet ].GetResources( ) != 0.0f )
 		{
-			m_Planets[ m_CurrPlanet ].SetResources( m_Planets[ m_CurrPlanet ].GetResources( ) - 1 );
+			m_Planets[ m_CurrPlanet ].SetResources( m_Planets[ m_CurrPlanet ].GetResources( ) - ( 0.25f * p_DeltaTime) );
 		}
 	}
 	
@@ -384,7 +384,7 @@ int Game::Update( double p_DeltaTime )
 		m_LazerPoints[ 1 ] = m_Player.GetPosition( ) + ( m_Player.GetViewDirection( ) * 1000.0f );
 
 		// Check if any bullet hit the planet
-			// Get the In and Out point of the intersection
+		// Get the In and Out point of the intersection
 		LDE::Vector2f inPump;
 		LDE::Vector2f out;
 		int pumpCol = LDE::LineCircleIntersection( m_LazerPoints[ 0 ], m_LazerPoints[ 1 ],
@@ -395,7 +395,7 @@ int Game::Update( double p_DeltaTime )
 			m_Planets[ m_CurrPlanet ].GetPosition( ), m_Planets[ m_CurrPlanet ].GetSize( ), inPlanet, out);
 
 
-		//float distColPump = LDE::Vector2f( ).Magnitude( );
+		// Calculate the lazer
 		if( pumpCol == 1 || planetCol == 1)
 		{
 			float planetDist = LDE::Vector2f( m_LazerPoints[ 0 ] - inPlanet ).Magnitude( );
@@ -408,9 +408,8 @@ int Game::Update( double p_DeltaTime )
 			else
 			{
 				m_LazerPoints[ 1 ] = inPump;
+				m_Planets[ m_CurrPlanet ].DrainPlanet( );
 			}
-
-			
 		}
 		else if( pumpCol == 1)
 		{
@@ -420,11 +419,6 @@ int Game::Update( double p_DeltaTime )
 		{
 			m_LazerPoints[ 1 ] = inPlanet;
 		}
-
-
-		// Is the lazer hitting the pump / planet
-		//m_LazerHittingPump = true;
-
 
 	}
 
@@ -477,6 +471,7 @@ int Game::Update( double p_DeltaTime )
 
 			// Set the planet's start position to the pump's position
 			m_Planets[ m_CurrPlanet ].SetPosition( pumpPosition );
+			m_Player.SetColor( m_Planets[ m_CurrPlanet - 1 ].GetColor( ) );
 
 		}
 	}
@@ -540,8 +535,8 @@ void Game::Render( )
 	glTranslatef(  (navSize.x / 2.0f ) + 10.0f, (navSize.y / 2.0f ) + 10.0f, 0.0f );
 	
 	// Render the lines
-	glColor3f( m_Player.GetColor( ).r / 255.0f,
-		m_Player.GetColor( ).g / 255.0f, m_Player.GetColor( ).b / 255.0f );
+	glColor3f( m_StartPlayerColor.r / 255.0f,
+		m_StartPlayerColor.g / 255.0f, m_StartPlayerColor.b / 255.0f );
 	
 	glBegin( GL_LINES );
 		glVertex2f( -navSize.x / 2.0f, 0.0f );
@@ -577,6 +572,7 @@ void Game::ResetGame( )
 	m_Player.SetViewDirection( LDE::Vector2f( 0.0f, 1.0f ) );
 	m_Player.SetDirection( LDE::Vector2f( 0.0f, 0.0f ) );
 	m_Player.SetRotation( 0.0f );
+	m_Player.SetColor( m_StartPlayerColor );
 }
 
 // Input functions

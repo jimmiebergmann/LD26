@@ -86,7 +86,7 @@ private:
 	float m_StartPlanetSizes[ PLANET_COUNT ];
 	float m_StartPlanetThicknesses[ PLANET_COUNT ];
 	float m_StartPlanetRotationSpeed[ PLANET_COUNT ];
-	unsigned int m_StartPlanetMaxResources[ PLANET_COUNT ];
+	float m_StartPlanetMaxResources[ PLANET_COUNT ];
 
 };
 

@@ -11,8 +11,9 @@ Planet::Planet( ) :
 	m_pTexture( NULL ),
 	m_Rotation( 0.0f ),
 	m_RotationSpeed( 0.0f ),
-	m_ResourcesMax( 1 ),
-	m_Resources( 1 ),
+	//m_ResourcesMax( 1 ),
+	m_Resources( 1.0f ),
+	m_Draining( false ),
 	m_Loaded( false )
 {
 
@@ -72,7 +73,9 @@ void Planet::Update( double p_DeltaTime )
 	}
 
 	// Update all the pumps
-	UpdateAllPumps( );
+	UpdateAllPumps( p_DeltaTime );
+
+	m_Draining = false;
 	
 }
 
@@ -140,11 +143,11 @@ bool Planet::SetPump( float p_Angle )
 	m_Pump.SetPosition( position );
 	m_Pump.SetColor( m_Color );
 	m_Pump.SetMaxSize( m_Size - m_Thickness );
-	m_Pump.SetTimeSpeed( m_PumpSpeed );
-	m_Pump.SetResources( 1 );
-	m_Pump.SetMaxResources( m_PumpMaxResources );
+	m_Pump.SetDrainSpeed( m_PumpSpeed );
+	m_Pump.SetResources( 0.07f );
+	//m_Pump.SetMaxResources( m_PumpMaxResources );
 	m_Pump.SetActive( true );
-	m_Pump.RestartTickTimer( );
+	//m_Pump.RestartTickTimer( );
 
 	return true;
 }
@@ -152,6 +155,11 @@ bool Planet::SetPump( float p_Angle )
 bool Planet::IsPumpActive( ) const
 {
 	return m_Pump.IsActive( );
+}
+
+void Planet::DrainPlanet( )
+{
+	m_Draining = true;
 }
 
 // Set functions
@@ -205,21 +213,21 @@ void Planet::SetColor( LDE::Color p_Color )
 	m_Color = p_Color;
 }
 
-void Planet::SetResources( int p_Resources )
+void Planet::SetResources( float p_Resources )
 {
 	m_Resources = p_Resources;
 }
-
+/*
 void Planet::SetPumpMaxResources( int p_Resources )
 {
 	m_PumpMaxResources = p_Resources;
 	m_Pump.SetMaxResources( m_PumpMaxResources );
-}
-
+}*/
+/*
 void Planet::SetResourcesMax( int p_Resources )
 {
 	m_ResourcesMax = p_Resources;
-}
+}*/
 
 void Planet::SetPumpSpeed( float p_Speed )
 {
@@ -230,11 +238,11 @@ void Planet::ResetPump( )
 {
 	m_Pump.SetColor( m_Color );
 	m_Pump.SetMaxSize( m_Size - m_Thickness );
-	m_Pump.SetTimeSpeed( m_PumpSpeed );
-	m_Pump.SetResources( 1 );
-	m_Pump.SetMaxResources( m_PumpMaxResources );
+	m_Pump.SetDrainSpeed( m_PumpSpeed );
+	m_Pump.SetResources( 0.07f );
+	//m_Pump.SetMaxResources( m_PumpMaxResources );
 	m_Pump.SetActive( false );
-	m_Pump.RestartTickTimer( );
+	//m_Pump.RestartTickTimer( );
 	m_Pump.CalculateSize( );
 }
 
@@ -270,15 +278,15 @@ LDE::Color Planet::GetColor( ) const
 }
 
 
-int Planet::GetResources( ) const
+float Planet::GetResources( ) const
 {
 	return m_Resources;
 }
-
+/*
 int Planet::GetResourcesMax( ) const
 {
 	return m_ResourcesMax;
-}
+}*/
 
 LDE::Vector2f Planet::GetLocalPumpPosition( )
 {
@@ -300,7 +308,7 @@ void Planet::RenderFill( )
 	const LDE::Vector2f planetUpperCorner = LDE::Vector2f( m_Size, m_Size );
 
 	// Calculate how much we should fill
-	float percent = (float)( m_Resources ) / (float)( m_ResourcesMax );
+	float percent = m_Resources; //(float)( m_Resources ) / (float)( m_ResourcesMax );
 
 	
 	const unsigned int pieces = 7;
@@ -386,7 +394,7 @@ void Planet::RenderFillPart( float startHeight, float stopHeight,
 	glEnd( );
 }
 
-void Planet::UpdateAllPumps( )
+void Planet::UpdateAllPumps( double p_DeltaTime )
 {
 	// No resources?
 	if( m_Resources == 0 )
@@ -394,32 +402,25 @@ void Planet::UpdateAllPumps( )
 		return;
 	}
 
-	//for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
-	//{
-	if( m_Pump.IsActive( ) )
+	if( m_Draining && m_Pump.IsActive( ) )
 	{
-		float timer = m_Pump.GetTickTimer( );
-		if( timer >= 1.0f )
+		//m_Pump.RestartTickTimer( );
+		//const int numResources = 1; //(int)(timer);
+		float numResources = m_Pump.GetDrainSpeed( ) * p_DeltaTime;
+
+		// Increase the pump resources
+		//m_Pump.IncreaseResources( numResources );
+		m_Pump.SetResources( m_Pump.GetResources( ) + numResources );
+
+		// Decrease the planets resources
+		m_Resources -= numResources;
+
+		if( m_Resources <= 0.0f )
 		{
-			m_Pump.RestartTickTimer( );
-			const int numResources = 1; //(int)(timer);
-			
-			// Increase the pump resources
-			m_Pump.IncreaseResources( numResources );
-
-			// Decrease the planets resources
-			m_Resources -= numResources;
-
-			if( m_Resources <= 0 )
-			{
-				m_Resources = 0;
-				//break;
-			}
-
+			m_Resources = 0.0f;
 		}
 	}
 
-	//}
 }
 
 void Planet::RenderPumps( )

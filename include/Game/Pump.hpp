@@ -18,29 +18,25 @@ public:
 	Pump(  );
 
 	// General public functions
-	void Update( double p_DeltaTime );
 	void Render( );
-	void IncreaseResources( unsigned int p_Amount );
-	void DecreaseResources( unsigned int p_Amount );
-	void RestartTickTimer( );
 	void CalculateSize( );
 
 	// Set functions
 	void SetTexture( LDE::Texture * p_pTexture );
 	void SetPosition( LDE::Vector2f p_Position );
 	void SetColor( LDE::Color p_Color );
-	void SetResources( int m_Count );
-	void SetMaxResources( int m_Count );
+	void SetResources( float p_Count );
 	void SetMaxSize( float p_Size );
-	void SetTimeSpeed( float p_Speed );
+	void SetDrainSpeed( float p_Speed );
 	void SetActive( bool p_Status );
 
 	// Get functions
 	float GetTickTimer( );
 	LDE::Vector2f GetPosition( ) const;
 	float GetSize( ) const;
-	int GetResources( ) const;
+	float GetResources( ) const;
 	float GetMaxSize( ) const;
+	float GetDrainSpeed( ) const;
 	bool IsActive( ) const;
 
 private:
@@ -51,10 +47,9 @@ private:
 	LDE::Vector2f m_Position;
 	float m_Size;
 	float m_MaxSize;
-	float m_TimeSpeed;
+	float m_DrainSpeed;
 	LDE::Color m_Color;
-	int m_Resources;
-	int m_MaxResources;
+	float m_Resources;
 	bool m_Active;
 
 };

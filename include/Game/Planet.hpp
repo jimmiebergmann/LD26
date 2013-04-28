@@ -25,6 +25,7 @@ public:
 	void Render( );
 	bool SetPump( float p_Angle );
 	bool IsPumpActive( ) const;
+	void DrainPlanet( );
 	
 	// Set functions
 	void SetTexture( LDE::Texture * p_pTexture );
@@ -34,9 +35,9 @@ public:
 	void SetRotation( float p_Rotation );
 	void SetRotationSpeed( float p_Speed );
 	void SetColor( LDE::Color p_Color );
-	void SetResources( int p_Resources );
-	void SetPumpMaxResources( int p_Resources );
-	void SetResourcesMax( int p_Resources );
+	void SetResources( float p_Resources );
+	//void SetPumpMaxResources( int p_Resources );
+	//void SetResourcesMax( int p_Resources );
 	void SetPumpSpeed( float p_Speed );
 	void ResetPump( );
 
@@ -47,8 +48,8 @@ public:
 	float GetRotation( ) const;
 	float GetRotationSpeed( ) const;
 	LDE::Color GetColor( ) const;
-	int GetResources( ) const;
-	int GetResourcesMax( ) const;
+	float GetResources( ) const;
+	//int GetResourcesMax( ) const;
 	LDE::Vector2f GetLocalPumpPosition( );
 	LDE::Vector2f GetGlobalPumpPosition( );
 
@@ -58,7 +59,7 @@ private:
 	void RenderFill( );
 	void RenderFillPart( float startHeight, float stopHeight,
 		float width, float rise );
-	void UpdateAllPumps( );
+	void UpdateAllPumps( double p_DeltaTime );
 	void RenderPumps( );
 	void ClearAllPumps( );
 
@@ -72,10 +73,11 @@ private:
 	float m_Size;
 	float m_Rotation;
 	float m_RotationSpeed;
-	int m_Resources;
-	int m_ResourcesMax;
+	float m_Resources;
+	//int m_ResourcesMax;
 	float m_PumpSpeed;
 	int m_PumpMaxResources;
+	bool m_Draining;
 	bool m_Loaded;
 
 	// Pump varaibles

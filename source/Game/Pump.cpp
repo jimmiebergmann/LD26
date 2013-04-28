@@ -5,9 +5,9 @@ Pump::Pump( ) :
 	m_pTexture( NULL ),
 	m_Size( 1.0f ),
 	m_MaxSize( 1.0f ),
-	m_TimeSpeed( 1.0f ),
-	m_Resources( 0 ),
-	m_MaxResources( 1 ),
+	m_DrainSpeed( 1.0f ),
+	m_Resources( 0.0f ),
+	//m_MaxResources( 1 ),
 	m_Active( false )
 {
 	m_RenderQuad.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
@@ -18,10 +18,6 @@ Pump::Pump( ) :
 }
 
 // General public functions
-void Pump::Update( double p_DeltaTime )
-{
-
-}
 
 void Pump::Render( )
 {
@@ -40,39 +36,9 @@ void Pump::Render( )
 
 }
 
-void Pump::IncreaseResources( unsigned int p_Amount )
-{
-	m_Resources += p_Amount;
-	if( m_Resources > m_MaxResources)
-	{
-		m_Resources = m_MaxResources;
-	}
-
-	CalculateSize( );
-}
-
-void Pump::DecreaseResources( unsigned int p_Amount )
-{
-	// NEED THIS AT ALL?
-	/*if( ((int)(m_Resources) - (int)(p_Amount) ) < 0 )
-	{
-		m_Resources = 0;
-	}
-	else
-	{
-		m_Resources -= p_Amount;
-	}
-	CalculateRenderQuad( );*/
-}
-
-void Pump::RestartTickTimer( )
-{
-	m_Timer.Start( );
-}
-
 void Pump::CalculateSize( )
 {
-	m_Size = m_MaxSize * ( (float)m_Resources / (float)m_MaxResources );
+	m_Size = m_MaxSize * m_Resources; //( (float)m_Resources / (float)m_MaxResources );
 
 	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
 	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
@@ -94,24 +60,30 @@ void Pump::SetColor( LDE::Color p_Color )
 	m_Color = p_Color;
 }
 
-void Pump::SetResources( int m_Count )
+void Pump::SetResources( float p_Count )
 {
-	m_Resources = m_Count;
-}
+	if( p_Count > 1.0f )
+	{
+		p_Count = 1.0f;
+	}
 
+	m_Resources = p_Count;
+	CalculateSize( );
+}
+/*
 void Pump::SetMaxResources( int m_Count )
 {
 	m_MaxResources = m_Count;
-}
+}*/
 
 void Pump::SetMaxSize( float p_Size )
 {
 	m_MaxSize = p_Size;
 }
 
-void Pump::SetTimeSpeed( float p_Speed )
+void Pump::SetDrainSpeed( float p_Speed )
 {
-	m_TimeSpeed = p_Speed;
+	m_DrainSpeed = p_Speed;
 }
 
 void Pump::SetActive( bool p_Status )
@@ -120,11 +92,11 @@ void Pump::SetActive( bool p_Status )
 }
 
 // Get functions
-float Pump::GetTickTimer( )
+/*float Pump::GetTickTimer( )
 {
 	m_Timer.Stop( );
 	return m_Timer.GetTime( ) * m_TimeSpeed;
-}
+}*/
 
 LDE::Vector2f Pump::GetPosition( ) const
 {
@@ -136,7 +108,7 @@ float Pump::GetSize( ) const
 	return m_Size;
 }
 
-int Pump::GetResources( ) const
+float Pump::GetResources( ) const
 {
 	return m_Resources;
 }
@@ -144,6 +116,11 @@ int Pump::GetResources( ) const
 float Pump::GetMaxSize( ) const
 {
 	return m_MaxSize;
+}
+
+float Pump::GetDrainSpeed( ) const
+{
+	return m_DrainSpeed;
 }
 
 bool Pump::IsActive( ) const
