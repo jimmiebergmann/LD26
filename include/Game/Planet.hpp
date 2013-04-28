@@ -17,7 +17,8 @@ public:
 
 	// Constructors / destructors
 	Planet( );
-	Planet( LDE::Vector2f p_Position, float p_Size, LDE::Texture * p_pTexture );
+	Planet( LDE::Vector2f p_Position, float p_Size,
+		float p_Thickness, LDE::Texture * p_pTexture );
 	~Planet( );
 	
 	// Public general functions
@@ -29,6 +30,7 @@ public:
 	// Set functions
 	void SetPosition( LDE::Vector2f p_Position );
 	void SetSize( float p_Size );
+	void SetThickness( float p_Thickness );
 	void SetRotation( float p_Rotation );
 	void SetRotationSpeed( float p_Speed );
 	void SetColor( LDE::Color p_Color );
@@ -55,9 +57,11 @@ private:
 	void ClearAllPumps( );
 
 	// Private variables
-	LDE::RenderQuad m_RenderQuad;
+	LDE::RenderQuad m_RenderQuad1;
+	LDE::RenderQuad m_RenderQuad2;
 	LDE::Texture * m_pTexture;
 	LDE::Vector2f m_Position;
+	float m_Thickness;
 	LDE::Color m_Color;
 	float m_Size;
 	float m_Rotation;

@@ -10,8 +10,9 @@ Planet::Planet( ) :
 {
 }
 
-Planet::Planet( LDE::Vector2f p_Position, float p_Size, LDE::Texture * p_pTexture ) :
+Planet::Planet( LDE::Vector2f p_Position, float p_Size, float p_Thickness, LDE::Texture * p_pTexture ) :
 	m_Position( p_Position ),
+	m_Thickness( p_Thickness ),
 	m_Size( p_Size ),
 	m_pTexture( p_pTexture ),
 	m_Rotation( 0.0f ),
@@ -45,11 +46,19 @@ bool Planet::Load( )
 
 
 	// Load the render object
-	m_RenderQuad.SetPosition( m_Position );
-	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
-	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
-	m_RenderQuad.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
-	m_RenderQuad.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
+	m_RenderQuad1.SetPosition( m_Position );
+	m_RenderQuad1.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
+	m_RenderQuad1.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
+	m_RenderQuad1.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_RenderQuad1.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
+
+	m_RenderQuad2.SetPosition( m_Position );
+	m_RenderQuad2.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) + LDE::Vector2f( m_Thickness, m_Thickness ) );
+	m_RenderQuad2.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) - LDE::Vector2f( m_Thickness, m_Thickness ) );
+	m_RenderQuad2.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_RenderQuad2.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
+
+
 
 	// Clear all the pumps
 	ClearAllPumps( );
@@ -109,11 +118,16 @@ void Planet::Render( )
 
 	glColor3f( (float)m_Color.r / 255.0f, (float)m_Color.g / 255.0f,
 		(float)m_Color.b / 255.0f );
-	m_RenderQuad.Render( );
+	m_RenderQuad1.Render( );
+
+	glColor3f( 5.0f / 255.0f, 5.0f / 255.0f, 5.0f / 255.0f );
+	m_RenderQuad2.Render( );
 
 	
 
 	// fill it!
+	glColor3f( (float)m_Color.r / 255.0f, (float)m_Color.g / 255.0f,
+		(float)m_Color.b / 255.0f );
 	glDisable( GL_TEXTURE_2D );
 	RenderFill( );
 
@@ -124,7 +138,7 @@ void Planet::Render( )
 
 bool Planet::AddNewPump( float p_Angle )
 {
-	Pump * pPump = new Pump( );
+	Pump * pPump = new Pump( m_pTexture );
 
 	// Calculate the new real angle
 	p_Angle = p_Angle + m_Rotation;
@@ -135,6 +149,7 @@ bool Planet::AddNewPump( float p_Angle )
 
 	// Set the pump position
 	pPump->SetPosition( position );
+	pPump->SetColor( m_Color );
 	
 	// Add the pump
 	m_Pumps.push_back( pPump );
@@ -146,14 +161,23 @@ bool Planet::AddNewPump( float p_Angle )
 void Planet::SetPosition( LDE::Vector2f p_Position )
 {
 	m_Position = p_Position;
-	m_RenderQuad.SetPosition( m_Position );
+	m_RenderQuad1.SetPosition( m_Position );
+	m_RenderQuad2.SetPosition( m_Position );
 }
 
 void Planet::SetSize( float p_Size )
 {
 	m_Size = p_Size;
-	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
-	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
+	m_RenderQuad1.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
+	m_RenderQuad1.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
+
+	m_RenderQuad2.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) + LDE::Vector2f( m_Thickness, m_Thickness ) );
+	m_RenderQuad2.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) - LDE::Vector2f( m_Thickness, m_Thickness ) );
+}
+
+void Planet::SetThickness( float p_Thickness )
+{
+	m_Thickness = p_Thickness;
 }
 
 void Planet::SetRotation( float p_Rotation )
@@ -314,21 +338,50 @@ void Planet::RenderFillPart( float startHeight, float stopHeight,
 
 void Planet::UpdateAllPumps( )
 {
+	// No resources?
+	if( m_Resources == 0 )
+	{
+		return;
+	}
 
+	for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
+	{
+		float timer = m_Pumps[ i ]->GetTickTimer( );
+		if( timer >= 1.0f )
+		{
+			 m_Pumps[ i ]->RestartTickTimer( );
+			int numResources = (int)(timer);
+			
+			// Increase the pump resources
+			m_Pumps[ i ]->IncreaseResources( numResources );
+
+			// Decrease the planets resources
+			m_Resources -= numResources;
+
+			if( m_Resources <= 0 )
+			{
+				m_Resources = 0;
+				break;
+			}
+
+		}
+
+	}
 }
 
 void Planet::RenderPumps( )
 {
 
-	glPointSize( 20.0f );
-	glBegin( GL_POINTS );
+	//glPointSize( 20.0f );
+	//glBegin( GL_POINTS );
 
 	for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
 	{
-		glVertex2f( m_Pumps[ i ]->GetPosition( ).x,
-			m_Pumps[ i ]->GetPosition( ).y );
+		m_Pumps[ i ]->Render( );
+		//glVertex2f( m_Pumps[ i ]->GetPosition( ).x,
+			//m_Pumps[ i ]->GetPosition( ).y );
 	}
-	glEnd( );
+	//glEnd( );
 }
 
 void Planet::ClearAllPumps( )

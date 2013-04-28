@@ -92,9 +92,10 @@ bool Game::Load( )
 	// Set up opengl
 	glEnable( GL_TEXTURE_2D );
 	glEnable( GL_LINE_SMOOTH );
-	glClearColor( 39.0f / 255.0f, 43.0f / 255.0f, 47.0f / 255.0f, 0.0f );
+	//glClearColor( 39.0f / 255.0f, 43.0f / 255.0f, 47.0f / 255.0f, 0.0f );
+	glClearColor( 5.0f / 255.0f, 5.0f / 255.0f, 5.0f / 255.0f, 0.0f );
 	glViewport( 0, 0, m_WindowSize.x, m_WindowSize.y );
-	glClear( GL_COLOR_BUFFER_BIT /* |GL_DEPTH_BUFFER_BIT */ );
+	glClear( GL_COLOR_BUFFER_BIT /*|GL_DEPTH_BUFFER_BIT */ );
 
 	// Enable alpha blending
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -111,7 +112,7 @@ bool Game::Load( )
 	glLoadIdentity( );
 
 	// Load all the textures
-	if( !m_PlanetTexture.Load( "Data/Textures/Planet.BMP" ) )
+	if( !m_PlanetTexture.Load( "Data/Textures/Planet2.BMP" ) )
 	{
 		std::cout << "[Game::Load( )] Unable to load the texture: " << SDL_GetError( ) << std::endl;
 		return false;
@@ -141,7 +142,7 @@ bool Game::Load( )
 	m_Hook.SetColor( m_Player.GetColor( ) );
 
 	// Load the planet
-	m_pPlanet = new Planet( LDE::Vector2f( 0.0f, 0.0f ), m_PlanetTexture.GetSize( ).x / 1, &m_PlanetTexture );
+	m_pPlanet = new Planet( LDE::Vector2f( 0.0f, 0.0f ), m_PlanetTexture.GetSize( ).x / 2, 50.0f, &m_PlanetTexture );
 	if( !m_pPlanet->Load( ) )
 	{
 		std::cout << "[Game::Load( )] Unable to load the planet: " << SDL_GetError( ) << std::endl;
@@ -149,6 +150,7 @@ bool Game::Load( )
 	}
 	m_pPlanet->SetPosition( LDE::Vector2f( 100.0f, 100.0f ) /*m_WindowSize / 2.0f*/ );
 	m_pPlanet->SetColor( LDE::Color( 100, 171, 100 ) );
+	//m_pPlanet->SetThickness( 50 );
 	m_pPlanet->SetResourcesMax( 100 );
 	m_pPlanet->SetResources( 60 );
 	m_pPlanet->SetRotationSpeed( 30.0f );
@@ -254,12 +256,15 @@ int Game::Update( double p_DeltaTime )
 	// Shoot pumps
 	if( KeyIsJustPressed( SDLK_SPACE ) )
 	{
-		PumpBullet * pPumpBullet = new PumpBullet( );
-		pPumpBullet->SetPosition( m_Player.GetPosition( ) );
-		pPumpBullet->SetDirection( m_Player.GetViewDirection( ) );
-		pPumpBullet->SetSpeed( 300.0f );
-		pPumpBullet->SetColor( m_Player.GetColor( ) );
-		m_PumpBullets.push_back( pPumpBullet );
+		if( m_PumpBullets.size( ) == 0 )
+		{
+			PumpBullet * pPumpBullet = new PumpBullet( );
+			pPumpBullet->SetPosition( m_Player.GetPosition( ) );
+			pPumpBullet->SetDirection( m_Player.GetViewDirection( ) );
+			pPumpBullet->SetSpeed( 300.0f );
+			pPumpBullet->SetColor( m_Player.GetColor( ) );
+			m_PumpBullets.push_back( pPumpBullet );
+		}
 	}
 
 	
@@ -402,7 +407,7 @@ void Game::UpdatePumpBullets( double p_DeltaTime )
 		// Remove the bullet if it's too far away from the player
 		float distance = LDE::Vector2f( m_Player.GetPosition( ) -
 			(*it)->GetPosition( ) ).Magnitude( );
-		if ( distance >= 2000.0f )
+		if ( distance >= 1500.0f )
 		{
 			// erase returns the new iterator
 			it = m_PumpBullets.erase(it);
