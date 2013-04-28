@@ -24,30 +24,20 @@ public:
 
 	// Set functions
 	void SetPosition( LDE::Vector2f p_Position );
-	void SetDirection( LDE::Vector2f p_Direction );
 	void SetColor( LDE::Color p_Color );
-	void SetSpeed( float m_Speed );
-	void SetResources( unsigned int m_Count );
-	void SetAttached( bool p_Status );
+	void SetResources( unsigned int m_Count );;
 
 	// Get functions
 	float GetLifeTime( );
 	LDE::Vector2f GetPosition( ) const;
-	LDE::Vector2f GetDirection( ) const;
-	float GetSpeed( ) const;
 	unsigned int GetResources( ) const;
-	bool GetAttached( ) const;
 
 private:
 
 	LDE::Timer m_LifeTimer;
 	LDE::Vector2f m_Position;
-	LDE::Vector2f m_Direction;
 	LDE::Color m_Color;
-	float m_Speed;
 	unsigned int m_Resources;
-	bool m_Attached;
-
 };
 
 #endif

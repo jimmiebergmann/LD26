@@ -2,8 +2,7 @@
 
 // Constructors
 Pump::Pump( ) :
-	m_Resources( 0 ),
-	m_Attached( false )
+	m_Resources( 0 )
 {
 	m_LifeTimer.Start( );
 }
@@ -11,14 +10,7 @@ Pump::Pump( ) :
 // General public functions
 void Pump::Update( double p_DeltaTime )
 {
-	if( m_Attached )
-	{
 
-	}
-	else
-	{
-
-	}
 }
 
 void Pump::Render( )
@@ -48,28 +40,13 @@ void Pump::SetPosition( LDE::Vector2f p_Position )
 	m_Position = p_Position;
 }
 
-void Pump::SetDirection( LDE::Vector2f p_Direction )
-{
-	m_Direction = p_Direction;
-}
-
 void Pump::SetColor( LDE::Color p_Color )
 {
-}
-
-void Pump::SetSpeed( float p_Speed )
-{
-	m_Speed = p_Speed;
 }
 
 void Pump::SetResources( unsigned int m_Count )
 {
 	m_Resources = m_Count;
-}
-
-void Pump::SetAttached( bool p_Status )
-{
-	m_Attached = p_Status;
 }
 
 // Get functions
@@ -84,22 +61,7 @@ LDE::Vector2f Pump::GetPosition( ) const
 	return m_Position;
 }
 
-LDE::Vector2f Pump::GetDirection( ) const
-{
-	return m_Direction;
-}
-
-float Pump::GetSpeed( ) const
-{
-	return m_Speed;
-}
-
 unsigned int Pump::GetResources( ) const
 {
 	return m_Resources;
-}
-
-bool Pump::GetAttached( ) const
-{
-	return m_Attached;
 }

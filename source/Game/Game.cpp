@@ -130,7 +130,7 @@ bool Game::Load( )
 		std::cout << "[Game::Load( )] Unable to load the player" << std::endl;
 		return false;
 	}
-	m_Player.SetPosition( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_Player.SetPosition( LDE::Vector2f( -400.0f, -400.0f ) );
 	m_Player.SetDirection( LDE::Vector2f( 0.0f, 1.0f ) );
 	m_Player.SetColor( LDE::Color( 203, 203, 203 ) );
 	m_Player.SetMaxSpeed( 300.0f );
@@ -147,10 +147,10 @@ bool Game::Load( )
 		std::cout << "[Game::Load( )] Unable to load the planet: " << SDL_GetError( ) << std::endl;
 		return false;
 	}
-	m_pPlanet->SetPosition( m_WindowSize / 2.0f );
+	m_pPlanet->SetPosition( LDE::Vector2f( 100.0f, 100.0f ) /*m_WindowSize / 2.0f*/ );
 	m_pPlanet->SetColor( LDE::Color( 100, 171, 100 ) );
 	m_pPlanet->SetResourcesMax( 100 );
-	m_pPlanet->SetResources( 100 );
+	m_pPlanet->SetResources( 60 );
 	m_pPlanet->SetRotationSpeed( 30.0f );
 
 	// Clear all pumps
@@ -428,15 +428,31 @@ void Game::UpdatePumpBullets( double p_DeltaTime )
 
 			if( status == 1 )
 			{
-				//std::cout << status << "  " <<  In.x << "  " << In.y << std::endl;
-				(*it)->SetDirection( LDE::Vector2f( 0.0f, 0.0f ) );
-				(*it)->SetPosition( In );
-			}
-	
+				// Add a pump to the planet
+				// Calculate the angle of the position for the pump
+				LDE::Vector2f pumpDirection = LDE::Vector2f( In - m_pPlanet->GetPosition( ) ).Normal( );
+			
+				// Calculate the angle
+				float angle = LDE::AngleBetweenVectors2( LDE::Vector2f( 0.0f, 1.0f ), pumpDirection );
+				if( pumpDirection.x < 0.0f )
+				{
+					angle = 360.f - angle;
+				}
 
-			// ////////////////////////
-			// Increase the iterator
-			++it;
+				// Add the pump the the planet
+				// Fails if there's not enought space on the surface.
+				m_pPlanet->AddNewPump( angle );
+
+				// ////////////////////////////////////////////////////////////
+				// Erase the bullet and add a pump to the planet instead.
+				it = m_PumpBullets.erase(it);
+			}
+			else
+			{
+				// ////////////////////////
+				// Increase the iterator
+				++it;
+			}
 		}
 	}
 

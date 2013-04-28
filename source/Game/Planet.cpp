@@ -1,4 +1,5 @@
 #include <Game/Planet.hpp>
+#include <Engine/Utility.hpp>
 #include <iostream>
 
 
@@ -23,6 +24,7 @@ Planet::Planet( LDE::Vector2f p_Position, float p_Size, LDE::Texture * p_pTextur
 }
 Planet::~Planet( )
 {
+	ClearAllPumps( );
 }
 
 // Public general functions
@@ -49,6 +51,8 @@ bool Planet::Load( )
 	m_RenderQuad.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
 	m_RenderQuad.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
 
+	// Clear all the pumps
+	ClearAllPumps( );
 
 	m_Loaded = true;
 	return true;
@@ -67,6 +71,9 @@ void Planet::Update( double p_DeltaTime )
 	{
 		m_Rotation -= 360.0f;
 	}
+
+	// Update all the pumps
+	UpdateAllPumps( );
 	
 }
 
@@ -89,6 +96,13 @@ void Planet::Render( )
 	glRotatef( m_Rotation, 0.0f, 0.0f, 1.0f );
 	glTranslatef( -m_Position.x, -m_Position.y, 0.0f );
 
+	// Render all the pumps
+	glDisable( GL_TEXTURE_2D );
+	glPushMatrix( );
+		glTranslatef( m_Position.x, m_Position.y, 0.0f );
+		RenderPumps( );
+	glPopMatrix( );
+
 	// Render the planet
 	glEnable( GL_TEXTURE_2D );
 	m_pTexture->Bind( );
@@ -97,6 +111,8 @@ void Planet::Render( )
 		(float)m_Color.b / 255.0f );
 	m_RenderQuad.Render( );
 
+	
+
 	// fill it!
 	glDisable( GL_TEXTURE_2D );
 	RenderFill( );
@@ -104,6 +120,26 @@ void Planet::Render( )
 
 	// Pull the matrix
 	glPopMatrix( );
+}
+
+bool Planet::AddNewPump( float p_Angle )
+{
+	Pump * pPump = new Pump( );
+
+	// Calculate the new real angle
+	p_Angle = p_Angle + m_Rotation;
+
+	// Calculate the position of the pump
+	LDE::Vector2f position = LDE::RotateVector2f( LDE::Vector2f( 0.0f, 1.0f ), -p_Angle );
+	position = position * m_Size;
+
+	// Set the pump position
+	pPump->SetPosition( position );
+	
+	// Add the pump
+	m_Pumps.push_back( pPump );
+
+	return true;
 }
 
 // Set functions
@@ -258,7 +294,6 @@ void Planet::RenderFill( )
 void Planet::RenderFillPart( float startHeight, float stopHeight,
 							float width, float rise )
 {
-
 	glBegin( GL_QUADS );
 
 	LDE::Vector2f Pos = m_Position - LDE::Vector2f( m_Size, m_Size );
@@ -275,6 +310,32 @@ void Planet::RenderFillPart( float startHeight, float stopHeight,
 	glVertex2f( Pos.x + ( Size * w1),			Pos.y + ( Size * h2 ) + ( Size * rise ) );
 
 	glEnd( );
+}
 
+void Planet::UpdateAllPumps( )
+{
 
+}
+
+void Planet::RenderPumps( )
+{
+
+	glPointSize( 20.0f );
+	glBegin( GL_POINTS );
+
+	for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
+	{
+		glVertex2f( m_Pumps[ i ]->GetPosition( ).x,
+			m_Pumps[ i ]->GetPosition( ).y );
+	}
+	glEnd( );
+}
+
+void Planet::ClearAllPumps( )
+{
+	for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
+	{
+		delete m_Pumps[ i ];
+	}
+	m_Pumps.clear( );
 }

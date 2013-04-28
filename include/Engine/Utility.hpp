@@ -31,6 +31,20 @@ namespace LDE
 			);
 	}
 
+	inline float AngleBetweenVectors2( LDE::Vector2f p_Vec1, LDE::Vector2f p_Vec2 )
+	{
+		float dotProduct = p_Vec1.Dot( p_Vec2 );			
+		float vectorsMagnitude = p_Vec1.Magnitude( ) * p_Vec2.Magnitude( );
+
+		float angle = RadiansToDegrees( acos(dotProduct / vectorsMagnitude)  );
+
+		if(_isnan(angle))
+			return 0;
+		
+		return angle ;
+	}
+
+
 	inline bool PointCircleIntersection( LDE::Vector2f p_Point,
 		LDE::Vector2f p_CirclePoint, float p_CircleRadius )
 	{
@@ -56,6 +70,15 @@ namespace LDE
 		LDE::Vector2f p_Circle, float p_R,
 		LDE::Vector2f & p_Enter, LDE::Vector2f & p_Exit)
 	{
+
+		/*
+		
+		result = 1 // intersection
+		result = -1 // none
+		result = 0 // tangent
+	
+		*/
+
 		float ax = p_LStart.x;
 		float ay = p_LStart.y;
 		float bx = p_LEnd.x;
@@ -64,18 +87,9 @@ namespace LDE
 		float cy = p_Circle.y;
 		float r = p_R;
 
- 
 		int result = -1;
 		bool setEnter = false;
 		bool setExit = false;
-
-		/* var result = {
-		inside: false,
-		tangent: false,
-		intersects: false,
-		enter: null,
-		exit: null
-		};*/
 
 		float a = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
 		float b = 2.0f * ((bx - ax) * (ax - cx) + (by - ay) * (ay - cy));
@@ -84,7 +98,6 @@ namespace LDE
 		if( deter <= 0.0f)
 		{
 			result = -1;
-			//result.inside = false;
 		}
 		else
 		{
@@ -96,12 +109,10 @@ namespace LDE
 				if((u1 < 0.0f && u2 < 0.0f) || (u1 > 1.0f && u2 > 1.0f))
 				{
 					result = -1;
-					//result.inside = false;
 				}
 				else
 				{
 					result = 1;
-					//result.inside = true;
 				}
 			}
 			else
@@ -119,12 +130,10 @@ namespace LDE
 				result = 1;
 				if( setExit && setEnter && p_Exit.x == p_Enter.x && p_Exit.y == p_Enter.y)
 				{
-					//result.tangent = true;
 					result = 0;
 				}
 			}
 		}
-	 // return result.intersects ? result : false;*/
 
 		return result;
 	}

@@ -1,0 +1,2 @@
+Line-circle intersection:
+http://trickkr.com/item/13/javascript-line-and-circle-intersection

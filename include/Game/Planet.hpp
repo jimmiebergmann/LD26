@@ -7,6 +7,8 @@
 #include <Engine/Texture.hpp>
 #include <Engine/Vector2.hpp>
 #include <Engine/Color.hpp>
+#include <Game/Pump.hpp>
+#include <vector>
 
 class Planet
 {
@@ -22,6 +24,7 @@ public:
 	bool Load( );
 	void Update( double p_DeltaTime );
 	void Render( );
+	bool AddNewPump( float p_Angle );
 	
 	// Set functions
 	void SetPosition( LDE::Vector2f p_Position );
@@ -47,6 +50,9 @@ private:
 	void RenderFill( );
 	void RenderFillPart( float startHeight, float stopHeight,
 		float width, float rise );
+	void UpdateAllPumps( );
+	void RenderPumps( );
+	void ClearAllPumps( );
 
 	// Private variables
 	LDE::RenderQuad m_RenderQuad;
@@ -59,6 +65,9 @@ private:
 	int m_Resources;
 	int m_ResourcesMax;
 	bool m_Loaded;
+
+	// Pump varaibles
+	std::vector< Pump* > m_Pumps;
 
 };
 
