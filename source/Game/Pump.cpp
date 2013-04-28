@@ -25,7 +25,7 @@ void Pump::Update( double p_DeltaTime )
 
 void Pump::Render( )
 {
-	if( m_pTexture == NULL )
+	if( m_pTexture == NULL || !m_Active )
 	{
 		return;
 	}
@@ -48,7 +48,7 @@ void Pump::IncreaseResources( unsigned int p_Amount )
 		m_Resources = m_MaxResources;
 	}
 
-	CalculateRenderQuad( );
+	CalculateSize( );
 }
 
 void Pump::DecreaseResources( unsigned int p_Amount )
@@ -69,9 +69,14 @@ void Pump::RestartTickTimer( )
 {
 	m_Timer.Start( );
 }
-/*
-void SetActive( bool p_Status );
-m_Timer.Start( );*/
+
+void Pump::CalculateSize( )
+{
+	m_Size = m_MaxSize * ( (float)m_Resources / (float)m_MaxResources );
+
+	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
+	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
+}
 
 void Pump::SetTexture( LDE::Texture * p_pTexture )
 {
@@ -126,6 +131,11 @@ LDE::Vector2f Pump::GetPosition( ) const
 	return m_Position;
 }
 
+float Pump::GetSize( ) const
+{
+	return m_Size;
+}
+
 int Pump::GetResources( ) const
 {
 	return m_Resources;
@@ -140,12 +150,3 @@ bool Pump::IsActive( ) const
 {
 	return m_Active;
 }
-
-void Pump::CalculateRenderQuad( )
-{
-	m_Size = m_MaxSize * ( (float)m_Resources / (float)m_MaxResources );
-
-	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
-	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
-}
-

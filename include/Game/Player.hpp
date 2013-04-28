@@ -29,8 +29,10 @@ public:
 	
 	// Set functions
 	void SetPosition( LDE::Vector2f p_Position );
+	void SetViewDirection( LDE::Vector2f p_Direction );
 	void SetDirection( LDE::Vector2f p_Direction );
 	void SetRotationSpeed( float p_Speed );
+	void SetRotation( float p_Rotation );
 	void SetMaxSpeed( float p_Speed );
 	void SetColor( LDE::Color p_Color );
 

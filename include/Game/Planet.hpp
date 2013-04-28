@@ -38,15 +38,19 @@ public:
 	void SetPumpMaxResources( int p_Resources );
 	void SetResourcesMax( int p_Resources );
 	void SetPumpSpeed( float p_Speed );
+	void ResetPump( );
 
 	// Get functions
 	LDE::Vector2f GetPosition( ) const;
 	float GetSize( ) const;
+	float GetPumpSize( ) const;
 	float GetRotation( ) const;
 	float GetRotationSpeed( ) const;
 	LDE::Color GetColor( ) const;
 	int GetResources( ) const;
 	int GetResourcesMax( ) const;
+	LDE::Vector2f GetLocalPumpPosition( );
+	LDE::Vector2f GetGlobalPumpPosition( );
 
 private:
 
@@ -76,6 +80,7 @@ private:
 
 	// Pump varaibles
 	Pump m_Pump;
+	float m_PumpAngle;
 	//std::vector< Pump* > m_Pumps;
 
 };

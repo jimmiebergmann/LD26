@@ -74,12 +74,14 @@ private:
 	LDE::Vector2f m_StartPlayerPosition;
 	LDE::Vector2f m_StartPlayerDirection;
 	LDE::Color m_StartPlayerColor;
+	float m_StartPlayerRadius;
 	float m_StartBulletSpeed;
 	float m_StartPumpSpeed;
 	LDE::Vector2f m_StartPlanetPosition;
 	LDE::Color m_StartPlanetColors[ PLANET_COUNT ];
 	float m_StartPlanetSizes[ PLANET_COUNT ];
 	float m_StartPlanetThicknesses[ PLANET_COUNT ];
+	float m_StartPlanetRotationSpeed[ PLANET_COUNT ];
 	unsigned int m_StartPlanetMaxResources[ PLANET_COUNT ];
 
 };

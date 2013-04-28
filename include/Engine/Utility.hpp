@@ -66,7 +66,7 @@ namespace LDE
 			f * ay + (1.0f - f) * by );
 	}
 
-	inline int lineCircleIntersection( LDE::Vector2f p_LStart, LDE::Vector2f p_LEnd,
+	inline int LineCircleIntersection( LDE::Vector2f p_LStart, LDE::Vector2f p_LEnd,
 		LDE::Vector2f p_Circle, float p_R,
 		LDE::Vector2f & p_Enter, LDE::Vector2f & p_Exit)
 	{
@@ -138,52 +138,19 @@ namespace LDE
 		return result;
 	}
 
+	inline bool CircleCircleIntersection( LDE::Vector2f p_P1, float p_R1,
+		LDE::Vector2f p_P2, float p_R2)
+	{
+		float distance = LDE::Vector2f( p_P2 - p_P1 ).Magnitude( );
+		if( distance <= ( p_R1 + p_R2 ) )
+		{
+			return true;
+		}
 
-	/*
-	function interpolatePoints(ax, ay, bx, by, f) {
-  return [f * ax + (1 - f) * bx, f * ay + (1 - f) * by];
-}
+		return false;
+	}
 
-function lineCircleIntersection(ax, ay, bx, by, cx, cy, r) {
-  var result = {
-    inside: false,
-    tangent: false,
-    intersects: false,
-    enter: null,
-    exit: null
-  };
-  var a = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
-  var b = 2 * ((bx - ax) * (ax - cx) + (by - ay) * (ay - cy));
-  var cc = cx * cx + cy * cy + ax * ax + ay * ay - 2 * (cx * ax + cy * ay) - r * r;
-  var deter = b * b - 4 * a * cc;
-  if(deter <= 0) {
-    result.inside = false;
-  } else {
-    var e = Math.sqrt(deter);
-    var u1 = (-b + e) / (2 * a);
-    var u2 = (-b - e) / (2 * a);
-    if((u1 < 0 || u1 > 1) && (u2 < 0 || u2 > 1)) {
-      if((u1 < 0 && u2 < 0) || (u1 > 1 && u2 > 1)) {
-        result.inside = false;
-      } else {
-        result.inside = true;
-      }
-    } else {
-      if(0 <= u2 && u2 <= 1) {
-        result.enter = interpolatePoints(ax, ay, bx, by, 1 - u2);
-      }
-      if(0 <= u1 && u1 <= 1) {
-        result.exit = interpolatePoints(ax, ay, bx, by, 1 - u1);
-      }
-      result.intersects = true;
-      if(result.exit != null && result.enter != null && result.exit[0] == result.enter[0] && result.exit[1] == result.enter[1]) {
-        result.tangent = true;
-      }
-    }
-  }
-  return result.intersects ? result : false;
-}
-*/
+
 
 }
 

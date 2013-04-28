@@ -129,10 +129,10 @@ void Planet::Render( )
 bool Planet::SetPump( float p_Angle )
 {
 	// Calculate the new real angle
-	p_Angle = p_Angle + m_Rotation;
+	m_PumpAngle = p_Angle + m_Rotation;
 
 	// Calculate the position of the pump
-	LDE::Vector2f position = LDE::RotateVector2f( LDE::Vector2f( 0.0f, 1.0f ), -p_Angle );
+	LDE::Vector2f position = LDE::RotateVector2f( LDE::Vector2f( 0.0f, 1.0f ), -m_PumpAngle );
 	position = position * m_Size;
 
 	// Set the pump position
@@ -226,6 +226,18 @@ void Planet::SetPumpSpeed( float p_Speed )
 	m_PumpSpeed = p_Speed;
 }
 
+void Planet::ResetPump( )
+{
+	m_Pump.SetColor( m_Color );
+	m_Pump.SetMaxSize( m_Size - m_Thickness );
+	m_Pump.SetTimeSpeed( m_PumpSpeed );
+	m_Pump.SetResources( 1 );
+	m_Pump.SetMaxResources( m_PumpMaxResources );
+	m_Pump.SetActive( false );
+	m_Pump.RestartTickTimer( );
+	m_Pump.CalculateSize( );
+}
+
 // Get functions
 LDE::Vector2f Planet::GetPosition( ) const
 {
@@ -235,6 +247,11 @@ LDE::Vector2f Planet::GetPosition( ) const
 float Planet::GetSize( ) const
 {
 	return m_Size;
+}
+
+float Planet::GetPumpSize( ) const
+{
+	return m_Pump.GetSize( );
 }
 
 float Planet::GetRotation( ) const
@@ -261,6 +278,18 @@ int Planet::GetResources( ) const
 int Planet::GetResourcesMax( ) const
 {
 	return m_ResourcesMax;
+}
+
+LDE::Vector2f Planet::GetLocalPumpPosition( )
+{
+	return m_Pump.GetPosition( );
+}
+
+LDE::Vector2f Planet::GetGlobalPumpPosition( )
+{
+	LDE::Vector2f position = LDE::RotateVector2f( LDE::Vector2f( 0.0f, 1.0f ), -m_PumpAngle + m_Rotation );
+	position = position * m_Pump.GetSize( );
+	return position;
 }
 
 // Private functions

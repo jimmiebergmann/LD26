@@ -164,6 +164,11 @@ void Player::SetPosition( LDE::Vector2f p_Position )
 	m_RenderQuad.SetPosition( p_Position );
 }
 
+void Player::SetViewDirection( LDE::Vector2f p_Direction )
+{
+	m_ViewDirection = p_Direction;
+}
+
 void Player::SetDirection( LDE::Vector2f p_Direction )
 {
 	m_Direction = p_Direction;
@@ -172,6 +177,11 @@ void Player::SetDirection( LDE::Vector2f p_Direction )
 void Player::SetRotationSpeed( float p_Speed )
 {
 	m_RotationSpeed = p_Speed;
+}
+
+void Player::SetRotation( float p_Rotation )
+{
+	m_Rotation = p_Rotation;
 }
 
 void Player::SetMaxSpeed( float p_Speed )

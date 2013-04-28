@@ -155,21 +155,6 @@ bool Game::Load( )
 	// Set all the other planet values
 	SetPlanetValues( );
 
-
-	/*
-	m_pPlanet = new Planet( LDE::Vector2f( 0.0f, 0.0f ), m_PlanetTexture.GetSize( ).x / 2, 50.0f, &m_PlanetTexture );
-	if( !m_pPlanet->Load( ) )
-	{
-		std::cout << "[Game::Load( )] Unable to load the planet: " << SDL_GetError( ) << std::endl;
-		return false;
-	}
-	m_pPlanet->SetPosition( LDE::Vector2f( 100.0f, 100.0f ));
-	m_pPlanet->SetColor( LDE::Color( 100, 171, 100 ) );
-	//m_pPlanet->SetThickness( 50 );
-	m_pPlanet->SetResourcesMax( 500 );
-	m_pPlanet->SetResources( m_pPlanet->GetResourcesMax( ) );
-	m_pPlanet->SetRotationSpeed( 30.0f );
-*/
 	// Clear all pumps
 	ClearAllPumpBullets( );
 
@@ -185,6 +170,7 @@ void Game::LoadStartValues( )
 	m_StartPlayerPosition = LDE::Vector2f( -400.0f, -400.0f );
 	m_StartPlayerDirection = LDE::Vector2f( 0.0f, 1.0f );
 	m_StartPlayerColor = LDE::Color( 203, 203, 203 );
+	m_StartPlayerRadius = 30.0f;
 	m_StartPumpSpeed = 100.0f;
 	m_StartBulletSpeed = 300.0f;
 
@@ -207,10 +193,16 @@ void Game::LoadStartValues( )
 	m_StartPlanetMaxResources[ 1 ] = 80;
 	m_StartPlanetMaxResources[ 2 ] = 60;
 
+	m_StartPlanetRotationSpeed[ 0 ] = 40.0f;
+	m_StartPlanetRotationSpeed[ 1 ] = 120.0f;
+	m_StartPlanetRotationSpeed[ 2 ] = 140.0f;
+
 }
 
 void Game::SetPlanetValues( )
 {
+	m_CurrPlanet = 0;
+
 	for( unsigned int i = 0; i < PLANET_COUNT; i++ )
 	{
 		m_Planets[ i ].SetPosition( m_StartPlanetPosition );
@@ -219,9 +211,10 @@ void Game::SetPlanetValues( )
 		m_Planets[ i ].SetResources( m_StartPlanetMaxResources[ i ] );
 		m_Planets[ i ].SetResourcesMax( m_StartPlanetMaxResources[ i ] );
 		m_Planets[ i ].SetPumpMaxResources( m_StartPlanetMaxResources[ i ] );
+		m_Planets[ i ].SetRotationSpeed( m_StartPlanetRotationSpeed[ i ] );
 		m_Planets[ i ].SetThickness( m_StartPlanetThicknesses[ i ] );
 		m_Planets[ i ].SetPumpSpeed( m_StartPumpSpeed );
-		
+		m_Planets[ i ].ResetPump( );
 	}
 
 }
@@ -373,11 +366,34 @@ int Game::Update( double p_DeltaTime )
 			gravityPower * (m_Planets[ m_CurrPlanet ].GetSize( ) / 50.0f );
 
 		m_Player.SetDirection( m_Player.GetDirection( ) + gravityVector );
-		
-		//std::cout << gravityPower << std::endl;
 	}
 
-	//std::cout << planetDistance << std::endl;
+	// Collision detect the player and the player/pump
+	if( CircleCircleIntersection( m_Player.GetPosition( ), m_StartPlayerRadius,
+		m_Planets[ m_CurrPlanet ].GetPosition( ), m_Planets[ m_CurrPlanet ].GetSize( ) ) )
+	{
+		// We died!
+		ResetGame( );
+	}
+
+	// Are we coliding with the pump?
+	LDE::Vector2f pumpPosition = m_Planets[ m_CurrPlanet ].GetGlobalPumpPosition( );
+	if( CircleCircleIntersection( m_Player.GetPosition( ), m_StartPlayerRadius,
+		pumpPosition, m_Planets[ m_CurrPlanet ].GetPumpSize( ) ) )
+	{
+		// We died!
+		ResetGame( );
+	}
+	//std::cout << pumpPosition.x << "   " << pumpPosition.y << std::endl;
+
+	// Are we outside the navigation system? Then reset
+	if( planetDistance >= 1000.0f )
+	{
+		// We are lost!
+		ResetGame( );
+	}
+
+
 
 	return 0;
 }
@@ -415,7 +431,14 @@ void Game::Render( )
 
 void Game::ResetGame( )
 {
+	SetPlanetValues( );
+	ClearAllPumpBullets( );
 
+	// Reset the player
+	m_Player.SetPosition( m_StartPlayerPosition );
+	m_Player.SetViewDirection( LDE::Vector2f( 0.0f, 1.0f ) );
+	m_Player.SetDirection( LDE::Vector2f( 0.0f, 0.0f ) );
+	m_Player.SetRotation( 0.0f );
 }
 
 // Input functions
@@ -484,7 +507,7 @@ void Game::UpdatePumpBullets( double p_DeltaTime )
 			// Get the In and Out point of the intersection
 			LDE::Vector2f In;
 			LDE::Vector2f Out;
-			int status = LDE::lineCircleIntersection(
+			int status = LDE::LineCircleIntersection(
 				lastPos,
 				(*it)->GetPosition( ),
 				m_Planets[ m_CurrPlanet ].GetPosition( ),

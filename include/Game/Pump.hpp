@@ -23,6 +23,7 @@ public:
 	void IncreaseResources( unsigned int p_Amount );
 	void DecreaseResources( unsigned int p_Amount );
 	void RestartTickTimer( );
+	void CalculateSize( );
 
 	// Set functions
 	void SetTexture( LDE::Texture * p_pTexture );
@@ -37,13 +38,12 @@ public:
 	// Get functions
 	float GetTickTimer( );
 	LDE::Vector2f GetPosition( ) const;
+	float GetSize( ) const;
 	int GetResources( ) const;
 	float GetMaxSize( ) const;
 	bool IsActive( ) const;
 
 private:
-
-	void CalculateRenderQuad( );
 
 	LDE::RenderQuad m_RenderQuad;
 	LDE::Texture * m_pTexture;
