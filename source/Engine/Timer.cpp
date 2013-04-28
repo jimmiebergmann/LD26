@@ -37,6 +37,17 @@ namespace LDE
 		return m_Time;
 	}
 
+	void Timer::DeltaLock(double delta)
+	{
+		Stop();
+		while(m_Time < (1.0f / delta))
+		{
+			Sleep( ((1.0f / delta) - m_Time) * 1000 );
+			//std::cout << ((1.0f / delta) - m_timeTaken) * 1000 << std::endl;
+			Stop();
+		}
+	}
+
 	double Timer::GetSystemTime( )
 	{
 //#ifdef PLATFORM_WINDOWS

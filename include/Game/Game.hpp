@@ -5,6 +5,7 @@
 #include <SDL_opengl.h>
 #include <Engine/RenderQuad.hpp>
 #include <Engine/Texture.hpp>
+//#include <Engine/Font.hpp>
 #include <Engine/Vector2.hpp>
 #include <Game/Player.hpp>
 #include <Game/Hook.hpp>
@@ -51,8 +52,8 @@ private:
 
 	
 	// Private variables
-	SDL_Surface * pSurface;
-	SDL_Surface * pScreen;
+	SDL_Surface * m_pSurface;
+	//LDE::Font m_Font;
 	LDE::Vector2i m_WindowSize;
 	LDE::Texture m_PlanetTexture;
 	LDE::Texture m_SpacecraftTexture;
@@ -73,7 +74,7 @@ private:
 	bool m_LastKeyState[ SDLK_LAST ];
 
 	// Planets
-	static const unsigned int PLANET_COUNT = 3;
+	static const unsigned int PLANET_COUNT = 5;
 	Planet m_Planets[ PLANET_COUNT ];
 
 	// Start game values

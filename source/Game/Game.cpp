@@ -1,12 +1,12 @@
 #include <Game/Game.hpp>
+#include <windows.h>
 #include <Engine/Utility.hpp>
 #include <Engine/Timer.hpp>
 #include <iostream>
 
 // Constructors / destructors
 Game::Game( ) :
-	pSurface( NULL ),
-	pScreen( NULL ),
+	m_pSurface( NULL ),
 	m_CurrPlanet( ) ,
 	m_ActiveLazer( false ),
 	m_OverlayAlpha( 0.0f ),
@@ -35,8 +35,24 @@ int Game::Run( int p_Argc, char ** p_Argv )
 		{
 			// Get the delta time
 			timer.Stop( );
+			timer.DeltaLock( 256.0f );
 			double deltaTime = timer.GetTime( );
+
+			
 			//std::cout << 1.0f / deltaTime << " FPS." << std::endl;
+			// Sleep some time if the delta time is day too much
+
+			/*const float fpslock = 1000.0;
+			if( (1.0f / deltaTime ) > fpslock )
+			{
+
+				float time = 1.0f / deltaTime;
+				
+
+				
+				Sleep( 0 );
+			}*/
+
 			timer.Start( );
 
 			// Poll events
@@ -83,13 +99,27 @@ bool Game::Load( )
 	SDL_WM_SetCaption( "LD26", NULL );
 
 	// Load the opengl SDL surface
-	if( (pSurface = SDL_SetVideoMode( m_WindowSize.x, m_WindowSize.y, 16, SDL_OPENGL /*| SDL_FULLSCREEN */ ) ) == NULL )
+	if( (m_pSurface = SDL_SetVideoMode( m_WindowSize.x, m_WindowSize.y, 16, SDL_OPENGL /*| SDL_FULLSCREEN */ ) ) == NULL )
 	{
 		std::cout << "[Game::Load( )] Unable to set SDL surface: " << SDL_GetError( ) << std::endl;
 		return false;
 	}
 
-	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
+	//Initialize SDL_ttf
+   /* if( TTF_Init() == -1 )
+    {
+		std::cout << "[Game::Load( )] Unable to init TTF: " << SDL_GetError( ) << std::endl;
+        return false;    
+    }*/
+
+	// Load the font
+	/*if( !m_Font.Load( "Data/Fonts/pixelart.ttf", 28 ) )
+	{
+		std::cout << "[Game::Load( )] Unable to load the font: " << SDL_GetError( ) << std::endl;
+		return false;
+	}*/
+
+	//SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 
 	// Set up opengl
 	glEnable( GL_TEXTURE_2D );
@@ -185,7 +215,7 @@ void Game::LoadStartValues( )
 	m_StartPlayerDirection = LDE::Vector2f( 0.0f, 1.0f );
 	m_StartPlayerColor = LDE::Color( 203, 203, 203 );
 	m_StartPlayerRadius = 15.0f;
-	m_StartPumpSpeed = 0.08f;
+	m_StartPumpSpeed = 0.2f;
 	m_StartBulletSpeed = 300.0f;
 	m_StartMaxPlanetRange = 1000.0f;
 
@@ -194,6 +224,8 @@ void Game::LoadStartValues( )
 	m_StartPlanetColors[ 0 ] = LDE::Color( 100, 171, 100 );	// Green
 	m_StartPlanetColors[ 1 ] = LDE::Color( 192, 82, 78 );	// Red
 	m_StartPlanetColors[ 2 ] = LDE::Color( 80, 156, 190 );	// Blue
+	m_StartPlanetColors[ 3 ] = LDE::Color( 175, 181, 89 );	// Yellow
+	m_StartPlanetColors[ 4 ] = LDE::Color( 95, 89, 181 );	// Purple
 
 	m_StartPlanetSizes[ 0 ] = 250;
 	m_StartPlanetThicknesses[ 0 ] = 50;
@@ -204,14 +236,23 @@ void Game::LoadStartValues( )
 	m_StartPlanetSizes[ 2 ] = 160;
 	m_StartPlanetThicknesses[ 2 ] = 25;
 
+	m_StartPlanetSizes[ 3 ] = 135;
+	m_StartPlanetThicknesses[ 3 ] = 20;
+
+	m_StartPlanetSizes[ 4 ] = 115;
+	m_StartPlanetThicknesses[ 4 ] = 18;
+
 	m_StartPlanetMaxResources[ 0 ] = 1.0f;
 	m_StartPlanetMaxResources[ 1 ] = 1.0f;
 	m_StartPlanetMaxResources[ 2 ] = 1.0f;
+	m_StartPlanetMaxResources[ 3 ] = 1.0f;
+	m_StartPlanetMaxResources[ 4 ] = 1.0f;
 
-	
 	m_StartPlanetRotationSpeed[ 0 ] = 30.0f;
 	m_StartPlanetRotationSpeed[ 1 ] = 40.0f;
 	m_StartPlanetRotationSpeed[ 2 ] = 50.0f;
+	m_StartPlanetRotationSpeed[ 3 ] = 55.0f;
+	m_StartPlanetRotationSpeed[ 4 ] = 60.0f;
 	
 /*
 	m_StartPlanetRotationSpeed[ 0 ] = 0.0f;
@@ -250,6 +291,9 @@ void Game::Unload( )
 
 	// Clear all the pumps
 	ClearAllPumpBullets( );
+
+	// Unload the font
+	//m_Font.Unload( );
 
 	// Close SDL
 	SDL_Quit();
@@ -341,7 +385,6 @@ int Game::Update( double p_DeltaTime )
 				pPumpBullet->SetSpeed( m_StartBulletSpeed );
 				pPumpBullet->SetColor( m_Player.GetColor( ) );
 				m_PumpBullets.push_back( pPumpBullet );
-			
 			}
 			// Shoot lazer
 			else if( m_Planets[ m_CurrPlanet ].IsPumpActive( ) )
@@ -445,10 +488,11 @@ int Game::Update( double p_DeltaTime )
 	if( planetDistance <= planetGravityStart )
 	{
 		float gravityPower = 1.0f - ( planetDistance / planetGravityStart );
-		gravityPower /= 2.0f;
+		gravityPower *= 35.0f;
+		//gravityPower /= 2.0f;
 		
 		LDE::Vector2f gravityVector = planetDirection.Normal( ) *
-			gravityPower * (m_Planets[ m_CurrPlanet ].GetSize( ) / 50.0f );
+			gravityPower * p_DeltaTime * (m_Planets[ m_CurrPlanet ].GetSize( ) / 50.0f );
 
 		m_Player.SetDirection( m_Player.GetDirection( ) + gravityVector );
 	}
@@ -552,11 +596,86 @@ void Game::Render( )
 
 	glPopMatrix( );
 
+
+	// Render overlay
 	glEnable( GL_TEXTURE_2D );
 	glColor4f( 1.0f, 1.0f, 1.0f, m_OverlayAlpha );
 	m_OverlayTexture.Bind( );
 	m_OverlayQuad.Render( );
 	glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+
+	// ///////////////////////////////////////////////////////////////////////////
+	// Render stat boxes
+	const float boxSize = 80.0f;
+	
+	glPushMatrix( );
+
+	glDisable( GL_TEXTURE_2D );
+
+	LDE::Vector2f statPos;
+	statPos.x = ((boxSize * PLANET_COUNT ) - boxSize ) / 2.0f;
+	statPos.y =  30.0f;
+	glTranslatef( statPos.x, statPos.y, 0.0f );
+
+	// Draw the background
+	glPushMatrix( );
+		for( unsigned int i = 0; i < PLANET_COUNT; i++ )
+		{
+			glColor3f( m_StartPlanetColors[ i ].r / 255.0f,
+				m_StartPlanetColors[ i ].g / 255.0f, m_StartPlanetColors[ i ].b / 255.0f );
+
+			glBegin( GL_QUADS );
+				glVertex2f( 0.0f, 0.0f );
+				glVertex2f( boxSize, 0.0f );
+				glVertex2f( boxSize, boxSize );
+				glVertex2f( 0.0f, boxSize );
+			glEnd( );
+
+			glTranslatef( boxSize * 2.0f, 0.0f, 0.0f );
+		}
+	glPopMatrix( );
+
+	// Draw the fill
+	const float edgeSize = 6.0f;
+
+	glColor3f( 5.0f / 255.0f, 5.0f / 255.0f, 5.0f / 255.0f );
+
+	for( unsigned int i = m_CurrPlanet; i < PLANET_COUNT; i++ )
+	{
+	
+		glPushMatrix( );
+		glTranslatef( i *boxSize * 2.0f, 0.0f, 0.0f );
+		glBegin( GL_QUADS );
+			glVertex2f( edgeSize, edgeSize );
+			glVertex2f( boxSize - edgeSize, edgeSize );
+			glVertex2f( boxSize - edgeSize, boxSize - edgeSize );
+			glVertex2f( edgeSize, boxSize - edgeSize );
+		glEnd( );
+
+		glPopMatrix( );
+	}
+
+	// Draw percentage
+	glPushMatrix( );
+		glColor3f( m_StartPlanetColors[ m_CurrPlanet ].r / 255.0f,
+				m_StartPlanetColors[ m_CurrPlanet ].g / 255.0f,
+				m_StartPlanetColors[ m_CurrPlanet ].b / 255.0f );
+		
+		float percent = 1.0f - m_Planets[ m_CurrPlanet ].GetResources( );
+		glTranslatef( (m_CurrPlanet ) *boxSize * 2.0f, 0.0f, 0.0f );
+		glBegin( GL_QUADS );
+			glVertex2f( edgeSize, edgeSize );
+			glVertex2f( boxSize - edgeSize, edgeSize );
+			glVertex2f( boxSize - edgeSize, edgeSize + ( boxSize - ( edgeSize* 2 ) ) * percent );
+			glVertex2f( edgeSize, edgeSize + ( boxSize - ( edgeSize* 2 ) ) * percent );
+		glEnd( );
+
+		glPopMatrix( );
+
+	glPopMatrix( );
+
+
+	//m_Font.Render( "Hello World!", m_pSurface );
 
 	// ///////////////////////////////////////////////////////
 	// Render a navigation system

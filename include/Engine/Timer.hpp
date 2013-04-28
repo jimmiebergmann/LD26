@@ -12,6 +12,7 @@ namespace LDE
 		void Start( );
 		void Stop( );
 		double GetTime( );
+		void DeltaLock(double delta);
 		static double GetSystemTime( );
 
 	private:
