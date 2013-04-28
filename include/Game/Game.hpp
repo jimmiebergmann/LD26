@@ -8,6 +8,8 @@
 #include <Engine/Vector2.hpp>
 #include <Game/Player.hpp>
 #include <Game/Hook.hpp>
+#include <Game/Pump.hpp>
+#include <Game/PumpBullet.hpp>
 #include <Game/Planet.hpp>
 #include <vector>
 
@@ -39,7 +41,9 @@ private:
 	bool KeyIsUp( SDLKey p_Key );
 	bool KeyIsJustPressed( SDLKey p_Key );
 	bool KeyIsJustReleased( SDLKey p_Key );
-
+	void UpdatePumpBullets( double p_DeltaTime );
+	void ClearAllPumpBullets( );
+	
 	// Private variables
 	SDL_Surface * pSurface;
 	SDL_Surface * pScreen;
@@ -48,6 +52,7 @@ private:
 	LDE::Texture m_SpacecraftTexture;
 	Player m_Player;
 	Hook m_Hook;
+	std::vector<PumpBullet*> m_PumpBullets;
 	Planet * m_pPlanet;
 	bool m_Running;
 

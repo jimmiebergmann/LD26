@@ -174,14 +174,6 @@
 			Name="Game"
 			>
 			<File
-				RelativePath="..\..\source\Game\Enemy.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Game\Enemy.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\source\Game\Game.cpp"
 				>
 			</File>
@@ -223,6 +215,14 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Game\Pump.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\source\Game\PumpBullet.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Game\PumpBullet.hpp"
 				>
 			</File>
 		</Filter>

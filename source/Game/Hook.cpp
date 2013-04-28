@@ -86,6 +86,11 @@ LDE::Vector2f Hook::GetPosition( ) const
 	return m_Position;
 }
 
+LDE::Vector2f Hook::GetHookPosition( ) const
+{
+	return m_HookPosition;
+}
+
 LDE::Color Hook::GetColor( ) const
 {
 	return m_Color;

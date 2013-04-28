@@ -2,6 +2,7 @@
 #define __LDE_VECTOR2_HPP__
 
 #include <cmath>
+#include <float.h>
 
 namespace LDE
 {
@@ -111,6 +112,17 @@ namespace LDE
 
 			x /= length;
 			y /= length;
+		}
+
+		float Dot( const Vector2< T > & v ) const
+		{
+			float Dot = ( x * v.x ) + ( y * v.y );
+			if( _isnan( Dot ) )
+			{
+				return 0.0f;
+			}
+			
+			return Dot;
 		}
 
 

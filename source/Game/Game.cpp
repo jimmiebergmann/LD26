@@ -1,4 +1,5 @@
 #include <Game/Game.hpp>
+#include <Engine/Utility.hpp>
 #include <Engine/Timer.hpp>
 #include <iostream>
 
@@ -137,7 +138,7 @@ bool Game::Load( )
 
 	// Load the hook
 	m_Hook.SetLength( 300.0f );
-	m_Hook.SetColor( LDE::Color( 203, 203, 203 ) );
+	m_Hook.SetColor( m_Player.GetColor( ) );
 
 	// Load the planet
 	m_pPlanet = new Planet( LDE::Vector2f( 0.0f, 0.0f ), m_PlanetTexture.GetSize( ).x / 1, &m_PlanetTexture );
@@ -152,6 +153,9 @@ bool Game::Load( )
 	m_pPlanet->SetResources( 100 );
 	m_pPlanet->SetRotationSpeed( 30.0f );
 
+	// Clear all pumps
+	ClearAllPumpBullets( );
+
 	// Clear all key inputs
 	ClearKeyStates( );
 
@@ -163,6 +167,9 @@ void Game::Unload( )
 	// Unload the textures
 	m_SpacecraftTexture.Unload( );
 	m_PlanetTexture.Unload( );
+
+	// Clear all the pumps
+	ClearAllPumpBullets( );
 
 	// Unload the planet
 	if( m_pPlanet )
@@ -235,7 +242,7 @@ int Game::Update( double p_DeltaTime )
 	}
 
 	// Shooting the hook
-	if( KeyIsDown( SDLK_SPACE ) )
+	if( KeyIsDown( SDLK_LCTRL ) )
 	{
 		LDE::Vector2f HookPosition = m_Player.GetPosition( );
 		HookPosition += m_Player.GetViewDirection( ) * m_Player.GetSize( ).y / 2.1f;
@@ -244,6 +251,16 @@ int Game::Update( double p_DeltaTime )
 		m_Hook.Fire( m_Player.GetViewDirection( ) );
 	}
 
+	// Shoot pumps
+	if( KeyIsJustPressed( SDLK_SPACE ) )
+	{
+		PumpBullet * pPumpBullet = new PumpBullet( );
+		pPumpBullet->SetPosition( m_Player.GetPosition( ) );
+		pPumpBullet->SetDirection( m_Player.GetViewDirection( ) );
+		pPumpBullet->SetSpeed( 300.0f );
+		pPumpBullet->SetColor( m_Player.GetColor( ) );
+		m_PumpBullets.push_back( pPumpBullet );
+	}
 
 	
 	// Fill test
@@ -280,6 +297,9 @@ int Game::Update( double p_DeltaTime )
 	// Update the planet
 	m_pPlanet->Update( p_DeltaTime );
 
+	// Update all pump bullets
+	UpdatePumpBullets( p_DeltaTime );
+
 	// Add planet gravity if we are close enought
 	LDE::Vector2f planetDirection = m_pPlanet->GetPosition( ) - m_Player.GetPosition( );
 	float planetDistance = planetDirection.Magnitude( );
@@ -289,7 +309,6 @@ int Game::Update( double p_DeltaTime )
 	{
 		float gravityPower = 1.0f - ( planetDistance / planetGravityStart );
 		
-		
 		LDE::Vector2f gravityVector = planetDirection.Normal( ) *
 			gravityPower * (m_pPlanet->GetSize( ) / 50.0f );
 
@@ -297,8 +316,6 @@ int Game::Update( double p_DeltaTime )
 		
 		//std::cout << gravityPower << std::endl;
 	}
-
-	
 
 	//std::cout << planetDistance << std::endl;
 
@@ -325,6 +342,12 @@ void Game::Render( )
 
 	// Render the planet
 	m_pPlanet->Render( );
+
+	// Render pumps
+	for( unsigned int i = 0; i < m_PumpBullets.size( ); i++ )
+	{
+		m_PumpBullets[ i ]->Render( );
+	}
 
 	// Swap all buffers
 	SDL_GL_SwapBuffers( );
@@ -371,3 +394,60 @@ bool Game::KeyIsJustReleased( SDLKey p_Key )
 		m_LastKeyState[ (unsigned int)(p_Key) ];
 }
 
+void Game::UpdatePumpBullets( double p_DeltaTime )
+{
+	std::vector<PumpBullet*>::iterator it = m_PumpBullets.begin();
+	while (it != m_PumpBullets.end())
+	{
+		// Remove the bullet if it's too far away from the player
+		float distance = LDE::Vector2f( m_Player.GetPosition( ) -
+			(*it)->GetPosition( ) ).Magnitude( );
+		if ( distance >= 2000.0f )
+		{
+			// erase returns the new iterator
+			it = m_PumpBullets.erase(it);
+		}
+		else
+		{
+			// Store the last position
+			LDE::Vector2f lastPos = (*it)->GetPosition( );
+
+			// Update the bullet
+			(*it)->Update( p_DeltaTime );
+
+			// Check if any bullet hit the planet
+			// Get the In and Out point of the intersection
+			LDE::Vector2f In;
+			LDE::Vector2f Out;
+			int status = LDE::lineCircleIntersection(
+				lastPos,
+				(*it)->GetPosition( ),
+				m_pPlanet->GetPosition( ),
+				m_pPlanet->GetSize( ),
+				In, Out);
+
+			if( status == 1 )
+			{
+				//std::cout << status << "  " <<  In.x << "  " << In.y << std::endl;
+				(*it)->SetDirection( LDE::Vector2f( 0.0f, 0.0f ) );
+				(*it)->SetPosition( In );
+			}
+	
+
+			// ////////////////////////
+			// Increase the iterator
+			++it;
+		}
+	}
+
+
+}
+
+void Game::ClearAllPumpBullets( )
+{
+	for( unsigned int i = 0; i < m_PumpBullets.size( ); i++ )
+	{
+		delete m_PumpBullets[ i ];
+	}
+	m_PumpBullets.clear( );
+}
