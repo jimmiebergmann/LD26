@@ -60,6 +60,9 @@ private:
 	Hook m_Hook;
 	std::vector<PumpBullet*> m_PumpBullets;
 	unsigned int m_CurrPlanet;
+	bool m_ActiveLazer;
+	LDE::Vector2f m_LazerPoints[ 2 ];
+	bool m_LazerHittingPump;
 	bool m_Running;
 
 	// Input

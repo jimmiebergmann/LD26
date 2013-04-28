@@ -8,7 +8,7 @@ Game::Game( ) :
 	pSurface( NULL ),
 	pScreen( NULL ),
 	m_CurrPlanet( ) ,
-	///m_pPlanet( NULL ),
+	m_ActiveLazer( false ),
 	m_Running( false )
 {
 }
@@ -309,17 +309,30 @@ int Game::Update( double p_DeltaTime )
 		m_Hook.Fire( m_Player.GetViewDirection( ) );
 	}
 
-	// Shoot pumps
-	if( KeyIsJustPressed( SDLK_SPACE ) )
+	// Shoot pumps / lazer
+	m_ActiveLazer = false;
+
+	if( KeyIsDown( SDLK_SPACE ) )
 	{
-		if( m_PumpBullets.size( ) == 0 && !m_Planets[ m_CurrPlanet ].IsPumpActive( ) )
+		if( m_PumpBullets.size( ) == 0 )
 		{
-			PumpBullet * pPumpBullet = new PumpBullet( );
-			pPumpBullet->SetPosition( m_Player.GetPosition( ) );
-			pPumpBullet->SetDirection( m_Player.GetViewDirection( ) );
-			pPumpBullet->SetSpeed( m_StartBulletSpeed );
-			pPumpBullet->SetColor( m_Player.GetColor( ) );
-			m_PumpBullets.push_back( pPumpBullet );
+			// Shoot bullets
+			if( !m_Planets[ m_CurrPlanet ].IsPumpActive( ) &&
+				KeyIsJustPressed( SDLK_SPACE ) )
+			{
+				PumpBullet * pPumpBullet = new PumpBullet( );
+				pPumpBullet->SetPosition( m_Player.GetPosition( ) );
+				pPumpBullet->SetDirection( m_Player.GetViewDirection( ) );
+				pPumpBullet->SetSpeed( m_StartBulletSpeed );
+				pPumpBullet->SetColor( m_Player.GetColor( ) );
+				m_PumpBullets.push_back( pPumpBullet );
+			
+			}
+			// Shoot lazer
+			else
+			{
+				m_ActiveLazer = true;
+			}
 		}
 	}
 
@@ -361,6 +374,60 @@ int Game::Update( double p_DeltaTime )
 	// Update all pump bullets
 	UpdatePumpBullets( p_DeltaTime );
 
+	const LDE::Vector2f pumpPosition = m_Planets[ m_CurrPlanet ].GetGlobalPumpPosition( );;
+
+	// Update the lazer
+	m_LazerHittingPump = false;
+	if( m_ActiveLazer )
+	{
+		m_LazerPoints[ 0 ] = m_Player.GetPosition( );
+		m_LazerPoints[ 1 ] = m_Player.GetPosition( ) + ( m_Player.GetViewDirection( ) * 1000.0f );
+
+		// Check if any bullet hit the planet
+			// Get the In and Out point of the intersection
+		LDE::Vector2f inPump;
+		LDE::Vector2f out;
+		int pumpCol = LDE::LineCircleIntersection( m_LazerPoints[ 0 ], m_LazerPoints[ 1 ],
+			pumpPosition, m_Planets[ m_CurrPlanet ].GetPumpSize( ), inPump, out);
+
+		LDE::Vector2f inPlanet;
+		int planetCol = LDE::LineCircleIntersection( m_LazerPoints[ 0 ], m_LazerPoints[ 1 ],
+			m_Planets[ m_CurrPlanet ].GetPosition( ), m_Planets[ m_CurrPlanet ].GetSize( ), inPlanet, out);
+
+
+		//float distColPump = LDE::Vector2f( ).Magnitude( );
+		if( pumpCol == 1 || planetCol == 1)
+		{
+			float planetDist = LDE::Vector2f( m_LazerPoints[ 0 ] - inPlanet ).Magnitude( );
+			float pumpDist = LDE::Vector2f( m_LazerPoints[ 0 ] - inPump ).Magnitude( );
+			
+			if( planetDist <= pumpDist )
+			{
+				m_LazerPoints[ 1 ] = inPlanet;
+			}
+			else
+			{
+				m_LazerPoints[ 1 ] = inPump;
+			}
+
+			
+		}
+		else if( pumpCol == 1)
+		{
+          	m_LazerPoints[ 1 ] = inPump;
+		}
+		else if( planetCol == 1)
+		{
+			m_LazerPoints[ 1 ] = inPlanet;
+		}
+
+
+		// Is the lazer hitting the pump / planet
+		//m_LazerHittingPump = true;
+
+
+	}
+
 	// Add planet gravity if we are close enought
 	LDE::Vector2f planetDirection = m_Planets[ m_CurrPlanet ].GetPosition( ) - m_Player.GetPosition( );
 	float planetDistance = planetDirection.Magnitude( );
@@ -386,7 +453,6 @@ int Game::Update( double p_DeltaTime )
 	}
 
 	// Are we coliding with the pump?
-	LDE::Vector2f pumpPosition = m_Planets[ m_CurrPlanet ].GetGlobalPumpPosition( );
 	if( CircleCircleIntersection( m_Player.GetPosition( ), m_StartPlayerRadius,
 		pumpPosition, m_Planets[ m_CurrPlanet ].GetPumpSize( ) ) )
 	{
@@ -449,6 +515,19 @@ void Game::Render( )
 		m_PumpBullets[ i ]->Render( );
 	}
 
+	// Render lazer
+	if( m_ActiveLazer )
+	{
+		// Render the lines
+		glColor3f( m_Player.GetColor( ).r / 255.0f,
+			m_Player.GetColor( ).g / 255.0f, m_Player.GetColor( ).b / 255.0f );
+
+		glBegin( GL_LINES );
+			glVertex2f( m_LazerPoints[ 0 ].x, m_LazerPoints[ 0 ].y );
+			glVertex2f( m_LazerPoints[ 1 ].x, m_LazerPoints[ 1 ].y );
+		glEnd( );
+	}
+
 	glPopMatrix( );
 
 
@@ -467,23 +546,18 @@ void Game::Render( )
 	glBegin( GL_LINES );
 		glVertex2f( -navSize.x / 2.0f, 0.0f );
 		glVertex2f( navSize.x / 2.0f, 0.0f );
-
 		glVertex2f( 0.0f, -navSize.y / 2.0f );
 		glVertex2f( 0.0f, navSize.y / 2.0f );
 	glEnd( );
 
 	// Render the indicator
-	//glColor3f( 1.0f, 0.0f, 0.0f );
-	glBegin( GL_POINTS );
-
-
 	LDE::Vector2f diff = m_Player.GetPosition( ) - m_Planets[ m_CurrPlanet ].GetPosition( );
 	diff /= LDE::Vector2f( m_StartMaxPlanetRange, m_StartMaxPlanetRange );
 	diff *= navSize / 2.0f;
-
-	glVertex2f( diff.x, 0.0f );
-	glVertex2f( 0.0f, diff.y );
-
+	
+	glBegin( GL_POINTS );
+		glVertex2f( diff.x, 0.0f );
+		glVertex2f( 0.0f, diff.y );
 	glEnd( );
 
 	glPopMatrix( );
