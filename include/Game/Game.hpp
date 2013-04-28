@@ -8,7 +8,6 @@
 //#include <Engine/Font.hpp>
 #include <Engine/Vector2.hpp>
 #include <Game/Player.hpp>
-#include <Game/Hook.hpp>
 #include <Game/Pump.hpp>
 #include <Game/PumpBullet.hpp>
 #include <Game/Planet.hpp>
@@ -39,6 +38,8 @@ private:
 	void ResetGame( );
 	void WinGame( );
 	void RandomlyPlacePlayer( );
+	void ReadHighScore( );
+	void SaveHighScore( );
 
 	// Input functions
 	void ClearKeyStates( );
@@ -65,7 +66,6 @@ private:
 	float m_BestTime;
 	float m_OverlayAlpha;
 	Player m_Player;
-	Hook m_Hook;
 	std::vector<PumpBullet*> m_PumpBullets;
 	unsigned int m_CurrPlanet;
 	bool m_ActiveLazer;

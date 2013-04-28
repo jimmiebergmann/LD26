@@ -4,6 +4,7 @@
 #include <Engine/Timer.hpp>
 #include <ctime>
 #include <iostream>
+#include <fstream>
 
 // Constructors / destructors
 Game::Game( ) :
@@ -151,9 +152,11 @@ bool Game::Load( )
 	// Load the game start values
 	LoadStartValues( );
 
+	// Load the high scores
+	ReadHighScore( );
 
 	// Load all the textures
-	if( !m_PlanetTexture.Load( "Data/Textures/Planet2.BMP" ) )
+	if( !m_PlanetTexture.Load( "Data/Textures/Planet.BMP" ) )
 	{
 		std::cout << "[Game::Load( )] Unable to load the texture: " << SDL_GetError( ) << std::endl;
 		return false;
@@ -186,15 +189,11 @@ bool Game::Load( )
 		return false;
 	}
 	RandomlyPlacePlayer( );
-	//m_Player.SetPosition( m_StartPlayerPosition );
 	m_Player.SetDirection( m_StartPlayerDirection );
 	m_Player.SetColor( m_StartPlayerColor );
 	m_Player.SetMaxSpeed( 300.0f );
 	m_Player.SetRotationSpeed( 200.0f );
 
-	// Load the hook
-	m_Hook.SetLength( 300.0f );
-	m_Hook.SetColor( m_Player.GetColor( ) );
 
 	// Load the planets
 	for( unsigned int i = 0; i < PLANET_COUNT; i++ )
@@ -219,7 +218,7 @@ bool Game::Load( )
 void Game::LoadStartValues( )
 {
 	m_CurrPlanet = 0;
-	m_StartMaxTime = 40.0f;
+	m_StartMaxTime = 120.0f;
 	m_BestTime = m_StartMaxTime;
 	m_StartPlayerPosition = LDE::Vector2f( -400.0f, -400.0f );
 	m_StartPlayerDirection = LDE::Vector2f( 0.0f, 1.0f );
@@ -368,16 +367,6 @@ int Game::Update( double p_DeltaTime )
 		m_Player.BurstRight( );
 	}
 
-	// Shooting the hook
-	if( KeyIsDown( SDLK_LCTRL ) )
-	{
-		LDE::Vector2f HookPosition = m_Player.GetPosition( );
-		HookPosition += m_Player.GetViewDirection( ) * m_Player.GetSize( ).y / 2.1f;
-
-		m_Hook.SetPosition( HookPosition  );
-		m_Hook.Fire( m_Player.GetViewDirection( ) );
-	}
-
 	// Shoot pumps / lazer
 	m_ActiveLazer = false;
 
@@ -429,20 +418,13 @@ int Game::Update( double p_DeltaTime )
 	// Update the player
 	m_Player.Update( p_DeltaTime );
 
-	// Update the hook
-	LDE::Vector2f HookPosition = m_Player.GetPosition( );
-	HookPosition += m_Player.GetViewDirection( ) * m_Player.GetSize( ).y / 2.1f;
-
-	m_Hook.SetPosition( HookPosition  );
-	m_Hook.Update( p_DeltaTime );
-
 	// Update the planet
 	m_Planets[ m_CurrPlanet ].Update( p_DeltaTime );
 
 	// Update all pump bullets
 	UpdatePumpBullets( p_DeltaTime );
 
-	const LDE::Vector2f pumpPosition = m_Planets[ m_CurrPlanet ].GetGlobalPumpPosition( );;
+	const LDE::Vector2f pumpPosition = m_Planets[ m_CurrPlanet ].GetGlobalPumpPosition( );
 
 	// Update the lazer
 	m_LazerHittingPump = false;
@@ -462,26 +444,25 @@ int Game::Update( double p_DeltaTime )
 		int planetCol = LDE::LineCircleIntersection( m_LazerPoints[ 0 ], m_LazerPoints[ 1 ],
 			m_Planets[ m_CurrPlanet ].GetPosition( ), m_Planets[ m_CurrPlanet ].GetSize( ), inPlanet, out);
 
-
-		// Calculate the lazer
-		if( pumpCol == 1 || planetCol == 1)
+		if( pumpCol == 1 && planetCol == 1)
 		{
 			float planetDist = LDE::Vector2f( m_LazerPoints[ 0 ] - inPlanet ).Magnitude( );
 			float pumpDist = LDE::Vector2f( m_LazerPoints[ 0 ] - inPump ).Magnitude( );
-			
-			if( planetDist <= pumpDist )
-			{
-				m_LazerPoints[ 1 ] = inPlanet;
-			}
-			else
+
+			if( pumpDist <= planetDist )
 			{
 				m_LazerPoints[ 1 ] = inPump;
 				m_Planets[ m_CurrPlanet ].DrainPlanet( );
+			}
+			else
+			{
+				m_LazerPoints[ 1 ] = inPlanet;
 			}
 		}
 		else if( pumpCol == 1)
 		{
           	m_LazerPoints[ 1 ] = inPump;
+			m_Planets[ m_CurrPlanet ].DrainPlanet( );
 		}
 		else if( planetCol == 1)
 		{
@@ -499,7 +480,6 @@ int Game::Update( double p_DeltaTime )
 	{
 		float gravityPower = 1.0f - ( planetDistance / planetGravityStart );
 		gravityPower *= 35.0f;
-		//gravityPower /= 2.0f;
 		
 		LDE::Vector2f gravityVector = planetDirection.Normal( ) *
 			gravityPower * p_DeltaTime * (m_Planets[ m_CurrPlanet ].GetSize( ) / 50.0f );
@@ -535,7 +515,7 @@ int Game::Update( double p_DeltaTime )
 
 	// Are we out of time?
 	m_GameTimer.Stop( );
-	if( m_GameTimer.GetTime( ) >= m_StartMaxTime )
+	if( m_GameTimer.GetTime( ) >= m_BestTime )
 	{
 		ResetGame( );
 		return 0;
@@ -590,9 +570,6 @@ void Game::Render( )
 	
 	// Render the player
 	m_Player.Render( );
-
-	// Render the hook
-	m_Hook.Render( );
 
 	// Render the planet
 	m_Planets[ m_CurrPlanet ].Render( );
@@ -699,37 +676,31 @@ void Game::Render( )
 
 	// ///////////////////////////////////////////////////////////////////////////
 	// Render the time bar
+
+	glDisable( GL_TEXTURE_2D );
 	
 	// Render the lines
 	m_GameTimer.Stop( );
 	float time = m_GameTimer.GetTime( );
-	static const float frameSize = 2.0f;
-	static const float barHeight = 8.0f;
+	static const float frameSize = 8.0f;
+	static const float barHeight = 12.0f;
 	static const float timeBarLength = m_WindowSize.x - ( frameSize * 2.0f );
-	const float currentLength = timeBarLength * ( time / m_StartMaxTime ); 
-	const float bestLength = timeBarLength * ( m_BestTime / m_StartMaxTime ); 
+	const float currentLength = timeBarLength * ( time / m_BestTime ); 
+	//const float bestLength = timeBarLength * ( m_BestTime / m_StartMaxTime ); 
 
 
 	glColor3f( m_Player.GetColor( ).r / 255.0f,
 		m_Player.GetColor( ).g / 255.0f, m_Player.GetColor( ).b / 255.0f );
 
 	glPushMatrix( );
-	glTranslatef( 0.0f, m_WindowSize.y - 24.0f, 0.0f );
+	glTranslatef( frameSize, m_WindowSize.y - 20.0f, 0.0f );
 
 	// Render the current time
 	glBegin( GL_QUADS );
-		glVertex2f( frameSize, frameSize );
-		glVertex2f( currentLength, frameSize );
-		glVertex2f( currentLength, frameSize + barHeight );
-		glVertex2f( frameSize, frameSize + barHeight );
-	glEnd( );
-
-	// Render the best time
-	glBegin( GL_QUADS );
-		glVertex2f( frameSize, frameSize + (barHeight + frameSize ) );
-		glVertex2f( bestLength, frameSize+ (barHeight + frameSize ) );
-		glVertex2f( bestLength, frameSize + barHeight+ (barHeight + frameSize ) );
-		glVertex2f( frameSize, frameSize + barHeight+ (barHeight + frameSize ) );
+		glVertex2f( 0.0f, 0.0f );
+		glVertex2f( currentLength, 0.0f );
+		glVertex2f( currentLength, barHeight );
+		glVertex2f( 0.0f, barHeight );
 	glEnd( );
 
 	glPopMatrix( );
@@ -795,6 +766,7 @@ void Game::WinGame( )
 	if( time < m_BestTime )
 	{
 		m_BestTime = time;
+		SaveHighScore( );
 	}
 
 	ResetGame( );
@@ -812,7 +784,28 @@ void Game::RandomlyPlacePlayer( )
 	m_Player.SetPosition( position );
 	m_Player.SetRotation( angle + 180.0f );
 	m_Player.SetViewDirection( direction );
+}
 
+void Game::ReadHighScore( )
+{
+	std::ifstream fin( "Data/highscore.txt" );
+
+	if( fin.is_open( ) )
+	{
+		fin >> m_BestTime;
+		fin.close( );
+	}
+}
+
+void Game::SaveHighScore( )
+{
+	std::ofstream fout( "Data/highscore.txt", std::fstream::trunc );
+
+	if( fout.is_open( ) )
+	{
+		fout << m_BestTime;
+		fout.close( );
+	}
 }
 
 // Input functions

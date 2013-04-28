@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../extlibs/SDL/include;&quot;../../extlibs/SDL_ttf-2.0.11/include&quot;"
+				AdditionalIncludeDirectories="../../include;../../extlibs/SDL/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(InputDir)\..\..\extlibs\SDL\lib\x86\SDL.lib $(InputDir)\..\..\extlibs\SDL\lib\x86\SDLmain.lib $(InputDir)\..\..\extlibs\SDL_ttf-2.0.11\lib\x86\SDL_ttf.lib opengl32.lib"
+				AdditionalDependencies="$(InputDir)\..\..\extlibs\SDL\lib\x86\SDL.lib $(InputDir)\..\..\extlibs\SDL\lib\x86\SDLmain.lib opengl32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)-d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -117,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../include;../../extlibs/SDL/include;&quot;../../extlibs/SDL_ttf-2.0.11/include&quot;"
+				AdditionalIncludeDirectories="../../include;../../extlibs/SDL/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(InputDir)\..\..\extlibs\SDL\lib\x86\SDL.lib $(InputDir)\..\..\extlibs\SDL\lib\x86\SDLmain.lib $(InputDir)\..\..\extlibs\SDL_ttf-2.0.11\lib\x86\SDL_ttf.lib opengl32.lib"
+				AdditionalDependencies="$(InputDir)\..\..\extlibs\SDL\lib\x86\SDL.lib $(InputDir)\..\..\extlibs\SDL\lib\x86\SDLmain.lib opengl32.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -182,14 +182,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\source\Game\Hook.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Game\Hook.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\source\Game\Main.cpp"
 				>
 			</File>
@@ -231,14 +223,6 @@
 			>
 			<File
 				RelativePath="..\..\include\Engine\Color.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\source\Engine\Font.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Engine\Font.hpp"
 				>
 			</File>
 			<File

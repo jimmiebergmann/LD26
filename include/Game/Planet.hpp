@@ -36,8 +36,6 @@ public:
 	void SetRotationSpeed( float p_Speed );
 	void SetColor( LDE::Color p_Color );
 	void SetResources( float p_Resources );
-	//void SetPumpMaxResources( int p_Resources );
-	//void SetResourcesMax( int p_Resources );
 	void SetPumpSpeed( float p_Speed );
 	void ResetPump( );
 

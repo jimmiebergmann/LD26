@@ -217,17 +217,6 @@ void Planet::SetResources( float p_Resources )
 {
 	m_Resources = p_Resources;
 }
-/*
-void Planet::SetPumpMaxResources( int p_Resources )
-{
-	m_PumpMaxResources = p_Resources;
-	m_Pump.SetMaxResources( m_PumpMaxResources );
-}*/
-/*
-void Planet::SetResourcesMax( int p_Resources )
-{
-	m_ResourcesMax = p_Resources;
-}*/
 
 void Planet::SetPumpSpeed( float p_Speed )
 {
