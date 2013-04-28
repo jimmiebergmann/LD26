@@ -26,7 +26,6 @@ public:
 
 	// Set functions
 	void SetPosition( LDE::Vector2f p_Position );
-	void SetSize( float p_Size );
 	void SetColor( LDE::Color p_Color );
 	void SetResources( unsigned int m_Count );
 	void SetMaxResources( unsigned int m_Count );

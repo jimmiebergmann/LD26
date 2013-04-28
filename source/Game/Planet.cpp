@@ -150,6 +150,9 @@ bool Planet::AddNewPump( float p_Angle )
 	// Set the pump position
 	pPump->SetPosition( position );
 	pPump->SetColor( m_Color );
+	pPump->SetMaxSize( m_Size - m_Thickness );
+	pPump->SetTimeSpeed( 100.0f );
+	pPump->SetMaxResources( 500 );
 	
 	// Add the pump
 	m_Pumps.push_back( pPump );

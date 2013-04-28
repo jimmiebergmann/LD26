@@ -151,8 +151,8 @@ bool Game::Load( )
 	m_pPlanet->SetPosition( LDE::Vector2f( 100.0f, 100.0f ) /*m_WindowSize / 2.0f*/ );
 	m_pPlanet->SetColor( LDE::Color( 100, 171, 100 ) );
 	//m_pPlanet->SetThickness( 50 );
-	m_pPlanet->SetResourcesMax( 100 );
-	m_pPlanet->SetResources( 60 );
+	m_pPlanet->SetResourcesMax( 500 );
+	m_pPlanet->SetResources( m_pPlanet->GetResourcesMax( ) );
 	m_pPlanet->SetRotationSpeed( 30.0f );
 
 	// Clear all pumps

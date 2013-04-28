@@ -11,8 +11,8 @@ Pump::Pump( LDE::Texture * p_pTexture ) :
 {
 	m_RenderQuad.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
 	m_RenderQuad.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
-	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
-	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( 100.0f, 100.0f ) );
+	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
+	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
 	m_Timer.Start( );
 }
 
@@ -43,6 +43,11 @@ void Pump::Render( )
 void Pump::IncreaseResources( unsigned int p_Amount )
 {
 	m_Resources += p_Amount;
+	if( m_Resources > m_MaxResources)
+	{
+		m_Resources = m_MaxResources;
+	}
+
 	CalculateRenderQuad( );
 }
 
@@ -69,11 +74,6 @@ void Pump::SetPosition( LDE::Vector2f p_Position )
 {
 	m_Position = p_Position;
 	m_RenderQuad.SetPosition( p_Position );
-}
-
-void Pump::SetSize( float p_Size )
-{
-	m_Size = p_Size;
 }
 
 void Pump::SetColor( LDE::Color p_Color )
@@ -125,5 +125,9 @@ float Pump::GetMaxSize( ) const
 
 void Pump::CalculateRenderQuad( )
 {
+	m_Size = m_MaxSize * ( (float)m_Resources / (float)m_MaxResources );
+
+	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
+	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
 }
 
