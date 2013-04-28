@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <Engine/Utility.hpp>
 #include <Engine/Timer.hpp>
+#include <ctime>
 #include <iostream>
 
 // Constructors / destructors
@@ -85,6 +86,10 @@ int Game::Run( int p_Argc, char ** p_Argv )
 // Private functions
 bool Game::Load( )
 {
+	// Seed "Random"
+	srand( time( NULL ) * 45621 ) ;
+
+	// Set the window size
 	m_WindowSize = LDE::Vector2i( 1024, 720 );
 
 	// Initialize SDL IMPORTANT
@@ -180,7 +185,8 @@ bool Game::Load( )
 		std::cout << "[Game::Load( )] Unable to load the player" << std::endl;
 		return false;
 	}
-	m_Player.SetPosition( m_StartPlayerPosition );
+	RandomlyPlacePlayer( );
+	//m_Player.SetPosition( m_StartPlayerPosition );
 	m_Player.SetDirection( m_StartPlayerDirection );
 	m_Player.SetColor( m_StartPlayerColor );
 	m_Player.SetMaxSpeed( 300.0f );
@@ -205,17 +211,21 @@ bool Game::Load( )
 	// Clear all key inputs
 	ClearKeyStates( );
 
+	m_GameTimer.Start( );
+
 	return true;
 }
 
 void Game::LoadStartValues( )
 {
 	m_CurrPlanet = 0;
+	m_StartMaxTime = 40.0f;
+	m_BestTime = m_StartMaxTime;
 	m_StartPlayerPosition = LDE::Vector2f( -400.0f, -400.0f );
 	m_StartPlayerDirection = LDE::Vector2f( 0.0f, 1.0f );
 	m_StartPlayerColor = LDE::Color( 203, 203, 203 );
 	m_StartPlayerRadius = 15.0f;
-	m_StartPumpSpeed = 0.2f;
+	m_StartPumpSpeed = 0.6f;
 	m_StartBulletSpeed = 300.0f;
 	m_StartMaxPlanetRange = 1000.0f;
 
@@ -523,6 +533,14 @@ int Game::Update( double p_DeltaTime )
 		return 0;
 	}
 
+	// Are we out of time?
+	m_GameTimer.Stop( );
+	if( m_GameTimer.GetTime( ) >= m_StartMaxTime )
+	{
+		ResetGame( );
+		return 0;
+	}
+
 	// Update the overlay alpha which is depending on the planet distance
 	const float distMaxSurface = m_StartMaxPlanetRange + m_Planets[ m_CurrPlanet ].GetSize( );
 	const float distToSurface = planetDistance - m_Planets[ m_CurrPlanet ].GetSize( );
@@ -543,6 +561,11 @@ int Game::Update( double p_DeltaTime )
 			// Set the planet's start position to the pump's position
 			m_Planets[ m_CurrPlanet ].SetPosition( pumpPosition );
 
+		}
+		// We won the game.
+		else
+		{
+			WinGame( );
 		}
 	}
 
@@ -674,6 +697,42 @@ void Game::Render( )
 
 	glPopMatrix( );
 
+	// ///////////////////////////////////////////////////////////////////////////
+	// Render the time bar
+	
+	// Render the lines
+	m_GameTimer.Stop( );
+	float time = m_GameTimer.GetTime( );
+	static const float frameSize = 2.0f;
+	static const float barHeight = 8.0f;
+	static const float timeBarLength = m_WindowSize.x - ( frameSize * 2.0f );
+	const float currentLength = timeBarLength * ( time / m_StartMaxTime ); 
+	const float bestLength = timeBarLength * ( m_BestTime / m_StartMaxTime ); 
+
+
+	glColor3f( m_Player.GetColor( ).r / 255.0f,
+		m_Player.GetColor( ).g / 255.0f, m_Player.GetColor( ).b / 255.0f );
+
+	glPushMatrix( );
+	glTranslatef( 0.0f, m_WindowSize.y - 24.0f, 0.0f );
+
+	// Render the current time
+	glBegin( GL_QUADS );
+		glVertex2f( frameSize, frameSize );
+		glVertex2f( currentLength, frameSize );
+		glVertex2f( currentLength, frameSize + barHeight );
+		glVertex2f( frameSize, frameSize + barHeight );
+	glEnd( );
+
+	// Render the best time
+	glBegin( GL_QUADS );
+		glVertex2f( frameSize, frameSize + (barHeight + frameSize ) );
+		glVertex2f( bestLength, frameSize+ (barHeight + frameSize ) );
+		glVertex2f( bestLength, frameSize + barHeight+ (barHeight + frameSize ) );
+		glVertex2f( frameSize, frameSize + barHeight+ (barHeight + frameSize ) );
+	glEnd( );
+
+	glPopMatrix( );
 
 	//m_Font.Render( "Hello World!", m_pSurface );
 
@@ -721,12 +780,39 @@ void Game::ResetGame( )
 	ClearKeyStates( );
 
 	// Reset the player
-	m_Player.SetPosition( m_StartPlayerPosition );
-	m_Player.SetViewDirection( LDE::Vector2f( 0.0f, 1.0f ) );
+	RandomlyPlacePlayer( );
 	m_Player.SetDirection( LDE::Vector2f( 0.0f, 0.0f ) );
-	m_Player.SetRotation( 0.0f );
-	m_Player.SetColor( m_StartPlayerColor );
 	m_ActiveLazer = false;
+
+	m_GameTimer.Start( );
+}
+
+void Game::WinGame( )
+{
+	m_GameTimer.Stop( );
+	float time = m_GameTimer.GetTime( );
+
+	if( time < m_BestTime )
+	{
+		m_BestTime = time;
+	}
+
+	ResetGame( );
+}
+
+void Game::RandomlyPlacePlayer( )
+{
+	float angle = rand( ) % 360;
+	const float distance = 500.0f;
+
+	LDE::Vector2f position = LDE::RotateVector2f( LDE::Vector2f( 0.0f, 1.0f ),angle );
+	position = position * distance;
+	LDE::Vector2f direction = LDE::RotateVector2f( LDE::Vector2f( 0.0f, 1.0f ), angle + 180.0f );
+	
+	m_Player.SetPosition( position );
+	m_Player.SetRotation( angle + 180.0f );
+	m_Player.SetViewDirection( direction );
+
 }
 
 // Input functions

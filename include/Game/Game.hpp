@@ -37,6 +37,8 @@ private:
 	int Update( double p_DeltaTime );
 	void Render( );
 	void ResetGame( );
+	void WinGame( );
+	void RandomlyPlacePlayer( );
 
 	// Input functions
 	void ClearKeyStates( );
@@ -59,6 +61,8 @@ private:
 	LDE::Texture m_SpacecraftTexture;
 	LDE::Texture m_OverlayTexture;
 	LDE::RenderQuad m_OverlayQuad;
+	LDE::Timer m_GameTimer;
+	float m_BestTime;
 	float m_OverlayAlpha;
 	Player m_Player;
 	Hook m_Hook;
@@ -78,6 +82,7 @@ private:
 	Planet m_Planets[ PLANET_COUNT ];
 
 	// Start game values
+	float m_StartMaxTime;
 	LDE::Vector2f m_StartPlayerPosition;
 	LDE::Vector2f m_StartPlayerDirection;
 	LDE::Color m_StartPlayerColor;
