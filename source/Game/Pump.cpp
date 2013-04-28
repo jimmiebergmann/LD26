@@ -1,23 +1,23 @@
 #include <Game/Pump.hpp>
 
 // Constructors
-Pump::Pump( LDE::Texture * p_pTexture ) :
-	m_pTexture( p_pTexture ),
+Pump::Pump( ) :
+	m_pTexture( NULL ),
 	m_Size( 1.0f ),
 	m_MaxSize( 1.0f ),
 	m_TimeSpeed( 1.0f ),
 	m_Resources( 0 ),
-	m_MaxResources( 1 )
+	m_MaxResources( 1 ),
+	m_Active( false )
 {
 	m_RenderQuad.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
 	m_RenderQuad.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
 	m_RenderQuad.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
 	m_RenderQuad.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) );
-	m_Timer.Start( );
+	
 }
 
 // General public functions
-
 void Pump::Update( double p_DeltaTime )
 {
 
@@ -69,6 +69,14 @@ void Pump::RestartTickTimer( )
 {
 	m_Timer.Start( );
 }
+/*
+void SetActive( bool p_Status );
+m_Timer.Start( );*/
+
+void Pump::SetTexture( LDE::Texture * p_pTexture )
+{
+	m_pTexture = p_pTexture;
+}
 
 void Pump::SetPosition( LDE::Vector2f p_Position )
 {
@@ -81,12 +89,12 @@ void Pump::SetColor( LDE::Color p_Color )
 	m_Color = p_Color;
 }
 
-void Pump::SetResources( unsigned int m_Count )
+void Pump::SetResources( int m_Count )
 {
 	m_Resources = m_Count;
 }
 
-void Pump::SetMaxResources( unsigned int m_Count )
+void Pump::SetMaxResources( int m_Count )
 {
 	m_MaxResources = m_Count;
 }
@@ -101,6 +109,11 @@ void Pump::SetTimeSpeed( float p_Speed )
 	m_TimeSpeed = p_Speed;
 }
 
+void Pump::SetActive( bool p_Status )
+{
+	m_Active = p_Status;
+}
+
 // Get functions
 float Pump::GetTickTimer( )
 {
@@ -113,7 +126,7 @@ LDE::Vector2f Pump::GetPosition( ) const
 	return m_Position;
 }
 
-unsigned int Pump::GetResources( ) const
+int Pump::GetResources( ) const
 {
 	return m_Resources;
 }
@@ -121,6 +134,11 @@ unsigned int Pump::GetResources( ) const
 float Pump::GetMaxSize( ) const
 {
 	return m_MaxSize;
+}
+
+bool Pump::IsActive( ) const
+{
+	return m_Active;
 }
 
 void Pump::CalculateRenderQuad( )

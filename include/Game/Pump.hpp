@@ -15,7 +15,7 @@ class Pump
 public:
 	
 	// Constructors
-	Pump( LDE::Texture * p_pTexture );
+	Pump(  );
 
 	// General public functions
 	void Update( double p_DeltaTime );
@@ -25,18 +25,21 @@ public:
 	void RestartTickTimer( );
 
 	// Set functions
+	void SetTexture( LDE::Texture * p_pTexture );
 	void SetPosition( LDE::Vector2f p_Position );
 	void SetColor( LDE::Color p_Color );
-	void SetResources( unsigned int m_Count );
-	void SetMaxResources( unsigned int m_Count );
+	void SetResources( int m_Count );
+	void SetMaxResources( int m_Count );
 	void SetMaxSize( float p_Size );
 	void SetTimeSpeed( float p_Speed );
+	void SetActive( bool p_Status );
 
 	// Get functions
 	float GetTickTimer( );
 	LDE::Vector2f GetPosition( ) const;
-	unsigned int GetResources( ) const;
+	int GetResources( ) const;
 	float GetMaxSize( ) const;
+	bool IsActive( ) const;
 
 private:
 
@@ -50,8 +53,9 @@ private:
 	float m_MaxSize;
 	float m_TimeSpeed;
 	LDE::Color m_Color;
-	unsigned int m_Resources;
-	unsigned int m_MaxResources;
+	int m_Resources;
+	int m_MaxResources;
+	bool m_Active;
 
 };
 

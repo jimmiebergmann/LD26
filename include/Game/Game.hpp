@@ -29,10 +29,13 @@ private:
 
 	// Private functions
 	bool Load( );
+	void LoadStartValues( );
+	void SetPlanetValues( );
 	void Unload( );
 	void PollEvents( );
 	int Update( double p_DeltaTime );
 	void Render( );
+	void ResetGame( );
 
 	// Input functions
 	void ClearKeyStates( );
@@ -41,8 +44,11 @@ private:
 	bool KeyIsUp( SDLKey p_Key );
 	bool KeyIsJustPressed( SDLKey p_Key );
 	bool KeyIsJustReleased( SDLKey p_Key );
+	
+	// Pump functions
 	void UpdatePumpBullets( double p_DeltaTime );
 	void ClearAllPumpBullets( );
+
 	
 	// Private variables
 	SDL_Surface * pSurface;
@@ -53,12 +59,28 @@ private:
 	Player m_Player;
 	Hook m_Hook;
 	std::vector<PumpBullet*> m_PumpBullets;
-	Planet * m_pPlanet;
+	unsigned int m_CurrPlanet;
 	bool m_Running;
 
 	// Input
 	bool m_CurrentKeyState[ SDLK_LAST ];
 	bool m_LastKeyState[ SDLK_LAST ];
+
+	// Planets
+	static const unsigned int PLANET_COUNT = 3;
+	Planet m_Planets[ PLANET_COUNT ];
+
+	// Start game values
+	LDE::Vector2f m_StartPlayerPosition;
+	LDE::Vector2f m_StartPlayerDirection;
+	LDE::Color m_StartPlayerColor;
+	float m_StartBulletSpeed;
+	float m_StartPumpSpeed;
+	LDE::Vector2f m_StartPlanetPosition;
+	LDE::Color m_StartPlanetColors[ PLANET_COUNT ];
+	float m_StartPlanetSizes[ PLANET_COUNT ];
+	float m_StartPlanetThicknesses[ PLANET_COUNT ];
+	unsigned int m_StartPlanetMaxResources[ PLANET_COUNT ];
 
 };
 

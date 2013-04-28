@@ -7,7 +7,8 @@
 Game::Game( ) :
 	pSurface( NULL ),
 	pScreen( NULL ),
-	m_pPlanet( NULL ),
+	m_CurrPlanet( ) ,
+	///m_pPlanet( NULL ),
 	m_Running( false )
 {
 }
@@ -111,6 +112,10 @@ bool Game::Load( )
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity( );
 
+	// Load the game start values
+	LoadStartValues( );
+
+
 	// Load all the textures
 	if( !m_PlanetTexture.Load( "Data/Textures/Planet2.BMP" ) )
 	{
@@ -131,9 +136,9 @@ bool Game::Load( )
 		std::cout << "[Game::Load( )] Unable to load the player" << std::endl;
 		return false;
 	}
-	m_Player.SetPosition( LDE::Vector2f( -400.0f, -400.0f ) );
-	m_Player.SetDirection( LDE::Vector2f( 0.0f, 1.0f ) );
-	m_Player.SetColor( LDE::Color( 203, 203, 203 ) );
+	m_Player.SetPosition( m_StartPlayerPosition );
+	m_Player.SetDirection( m_StartPlayerDirection );
+	m_Player.SetColor( m_StartPlayerColor );
 	m_Player.SetMaxSpeed( 300.0f );
 	m_Player.SetRotationSpeed( 200.0f );
 
@@ -141,20 +146,30 @@ bool Game::Load( )
 	m_Hook.SetLength( 300.0f );
 	m_Hook.SetColor( m_Player.GetColor( ) );
 
-	// Load the planet
+	// Load the planets
+	for( unsigned int i = 0; i < PLANET_COUNT; i++ )
+	{
+		m_Planets[ i ].SetTexture( &m_PlanetTexture );
+		m_Planets[ i ].Load( );
+	}
+	// Set all the other planet values
+	SetPlanetValues( );
+
+
+	/*
 	m_pPlanet = new Planet( LDE::Vector2f( 0.0f, 0.0f ), m_PlanetTexture.GetSize( ).x / 2, 50.0f, &m_PlanetTexture );
 	if( !m_pPlanet->Load( ) )
 	{
 		std::cout << "[Game::Load( )] Unable to load the planet: " << SDL_GetError( ) << std::endl;
 		return false;
 	}
-	m_pPlanet->SetPosition( LDE::Vector2f( 100.0f, 100.0f ) /*m_WindowSize / 2.0f*/ );
+	m_pPlanet->SetPosition( LDE::Vector2f( 100.0f, 100.0f ));
 	m_pPlanet->SetColor( LDE::Color( 100, 171, 100 ) );
 	//m_pPlanet->SetThickness( 50 );
 	m_pPlanet->SetResourcesMax( 500 );
 	m_pPlanet->SetResources( m_pPlanet->GetResourcesMax( ) );
 	m_pPlanet->SetRotationSpeed( 30.0f );
-
+*/
 	// Clear all pumps
 	ClearAllPumpBullets( );
 
@@ -162,6 +177,53 @@ bool Game::Load( )
 	ClearKeyStates( );
 
 	return true;
+}
+
+void Game::LoadStartValues( )
+{
+	m_CurrPlanet = 0;
+	m_StartPlayerPosition = LDE::Vector2f( -400.0f, -400.0f );
+	m_StartPlayerDirection = LDE::Vector2f( 0.0f, 1.0f );
+	m_StartPlayerColor = LDE::Color( 203, 203, 203 );
+	m_StartPumpSpeed = 100.0f;
+	m_StartBulletSpeed = 300.0f;
+
+	m_StartPlanetPosition = LDE::Vector2f( 0.0f, 0.0f );
+
+	m_StartPlanetColors[ 0 ] = LDE::Color( 100, 171, 100 );	// Green
+	m_StartPlanetColors[ 1 ] = LDE::Color( 192, 82, 78 );	// Red
+	m_StartPlanetColors[ 2 ] = LDE::Color( 80, 156, 190 );	// Blue
+
+	m_StartPlanetSizes[ 0 ] = 200;
+	m_StartPlanetThicknesses[ 0 ] = 50;
+
+	m_StartPlanetSizes[ 1 ] = 250;
+	m_StartPlanetThicknesses[ 1 ] = 50;
+
+	m_StartPlanetSizes[ 2 ] = 200;
+	m_StartPlanetThicknesses[ 2 ] = 50;
+
+	m_StartPlanetMaxResources[ 0 ] = 100;
+	m_StartPlanetMaxResources[ 1 ] = 80;
+	m_StartPlanetMaxResources[ 2 ] = 60;
+
+}
+
+void Game::SetPlanetValues( )
+{
+	for( unsigned int i = 0; i < PLANET_COUNT; i++ )
+	{
+		m_Planets[ i ].SetPosition( m_StartPlanetPosition );
+		m_Planets[ i ].SetColor( m_StartPlanetColors[ i ] );
+		m_Planets[ i ].SetSize( m_StartPlanetSizes[ i ] );
+		m_Planets[ i ].SetResources( m_StartPlanetMaxResources[ i ] );
+		m_Planets[ i ].SetResourcesMax( m_StartPlanetMaxResources[ i ] );
+		m_Planets[ i ].SetPumpMaxResources( m_StartPlanetMaxResources[ i ] );
+		m_Planets[ i ].SetThickness( m_StartPlanetThicknesses[ i ] );
+		m_Planets[ i ].SetPumpSpeed( m_StartPumpSpeed );
+		
+	}
+
 }
 
 void Game::Unload( )
@@ -172,13 +234,6 @@ void Game::Unload( )
 
 	// Clear all the pumps
 	ClearAllPumpBullets( );
-
-	// Unload the planet
-	if( m_pPlanet )
-	{
-		delete m_pPlanet;
-		m_pPlanet = NULL;
-	}
 
 	// Close SDL
 	SDL_Quit();
@@ -256,12 +311,12 @@ int Game::Update( double p_DeltaTime )
 	// Shoot pumps
 	if( KeyIsJustPressed( SDLK_SPACE ) )
 	{
-		if( m_PumpBullets.size( ) == 0 )
+		if( m_PumpBullets.size( ) == 0 && !m_Planets[ m_CurrPlanet ].IsPumpActive( ) )
 		{
 			PumpBullet * pPumpBullet = new PumpBullet( );
 			pPumpBullet->SetPosition( m_Player.GetPosition( ) );
 			pPumpBullet->SetDirection( m_Player.GetViewDirection( ) );
-			pPumpBullet->SetSpeed( 300.0f );
+			pPumpBullet->SetSpeed( m_StartBulletSpeed );
 			pPumpBullet->SetColor( m_Player.GetColor( ) );
 			m_PumpBullets.push_back( pPumpBullet );
 		}
@@ -271,16 +326,16 @@ int Game::Update( double p_DeltaTime )
 	// Fill test
 	if( KeyIsDown( SDLK_z ) )
 	{
-		if( m_pPlanet->GetResources( ) != m_pPlanet->GetResourcesMax( ) )
+		if( m_Planets[ m_CurrPlanet ].GetResources( ) != m_Planets[ m_CurrPlanet ].GetResourcesMax( ) )
 		{
-			m_pPlanet->SetResources( m_pPlanet->GetResources( ) + 1 );
+			m_Planets[ m_CurrPlanet ].SetResources( m_Planets[ m_CurrPlanet ].GetResources( ) + 1 );
 		}
 	}
 	else if( KeyIsDown( SDLK_x ) )
 	{
-		if( m_pPlanet->GetResources( ) != 0 )
+		if( m_Planets[ m_CurrPlanet ].GetResources( ) != 0 )
 		{
-			m_pPlanet->SetResources( m_pPlanet->GetResources( ) - 1 );
+			m_Planets[ m_CurrPlanet ].SetResources( m_Planets[ m_CurrPlanet ].GetResources( ) - 1 );
 		}
 	}
 	
@@ -300,22 +355,22 @@ int Game::Update( double p_DeltaTime )
 	m_Hook.Update( p_DeltaTime );
 
 	// Update the planet
-	m_pPlanet->Update( p_DeltaTime );
+	m_Planets[ m_CurrPlanet ].Update( p_DeltaTime );
 
 	// Update all pump bullets
 	UpdatePumpBullets( p_DeltaTime );
 
 	// Add planet gravity if we are close enought
-	LDE::Vector2f planetDirection = m_pPlanet->GetPosition( ) - m_Player.GetPosition( );
+	LDE::Vector2f planetDirection = m_Planets[ m_CurrPlanet ].GetPosition( ) - m_Player.GetPosition( );
 	float planetDistance = planetDirection.Magnitude( );
-	const float planetGravityStart = m_pPlanet->GetSize( ) * 4.5f;
+	const float planetGravityStart = m_Planets[ m_CurrPlanet ].GetSize( ) * 4.5f;
 
 	if( planetDistance <= planetGravityStart )
 	{
 		float gravityPower = 1.0f - ( planetDistance / planetGravityStart );
 		
 		LDE::Vector2f gravityVector = planetDirection.Normal( ) *
-			gravityPower * (m_pPlanet->GetSize( ) / 50.0f );
+			gravityPower * (m_Planets[ m_CurrPlanet ].GetSize( ) / 50.0f );
 
 		m_Player.SetDirection( m_Player.GetDirection( ) + gravityVector );
 		
@@ -346,7 +401,7 @@ void Game::Render( )
 	m_Hook.Render( );
 
 	// Render the planet
-	m_pPlanet->Render( );
+	m_Planets[ m_CurrPlanet ].Render( );
 
 	// Render pumps
 	for( unsigned int i = 0; i < m_PumpBullets.size( ); i++ )
@@ -356,6 +411,11 @@ void Game::Render( )
 
 	// Swap all buffers
 	SDL_GL_SwapBuffers( );
+}
+
+void Game::ResetGame( )
+{
+
 }
 
 // Input functions
@@ -427,15 +487,15 @@ void Game::UpdatePumpBullets( double p_DeltaTime )
 			int status = LDE::lineCircleIntersection(
 				lastPos,
 				(*it)->GetPosition( ),
-				m_pPlanet->GetPosition( ),
-				m_pPlanet->GetSize( ),
+				m_Planets[ m_CurrPlanet ].GetPosition( ),
+				m_Planets[ m_CurrPlanet ].GetSize( ),
 				In, Out);
 
 			if( status == 1 )
 			{
 				// Add a pump to the planet
 				// Calculate the angle of the position for the pump
-				LDE::Vector2f pumpDirection = LDE::Vector2f( In - m_pPlanet->GetPosition( ) ).Normal( );
+				LDE::Vector2f pumpDirection = LDE::Vector2f( In - m_Planets[ m_CurrPlanet ].GetPosition( ) ).Normal( );
 			
 				// Calculate the angle
 				float angle = LDE::AngleBetweenVectors2( LDE::Vector2f( 0.0f, 1.0f ), pumpDirection );
@@ -444,9 +504,9 @@ void Game::UpdatePumpBullets( double p_DeltaTime )
 					angle = 360.f - angle;
 				}
 
-				// Add the pump the the planet
+				// Add the pump to the planet
 				// Fails if there's not enought space on the surface.
-				m_pPlanet->AddNewPump( angle );
+				m_Planets[ m_CurrPlanet ].SetPump( angle );
 
 				// ////////////////////////////////////////////////////////////
 				// Erase the bullet and add a pump to the planet instead.

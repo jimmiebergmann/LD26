@@ -17,17 +17,17 @@ public:
 
 	// Constructors / destructors
 	Planet( );
-	Planet( LDE::Vector2f p_Position, float p_Size,
-		float p_Thickness, LDE::Texture * p_pTexture );
 	~Planet( );
 	
 	// Public general functions
 	bool Load( );
 	void Update( double p_DeltaTime );
 	void Render( );
-	bool AddNewPump( float p_Angle );
+	bool SetPump( float p_Angle );
+	bool IsPumpActive( ) const;
 	
 	// Set functions
+	void SetTexture( LDE::Texture * p_pTexture );
 	void SetPosition( LDE::Vector2f p_Position );
 	void SetSize( float p_Size );
 	void SetThickness( float p_Thickness );
@@ -35,7 +35,9 @@ public:
 	void SetRotationSpeed( float p_Speed );
 	void SetColor( LDE::Color p_Color );
 	void SetResources( int p_Resources );
+	void SetPumpMaxResources( int p_Resources );
 	void SetResourcesMax( int p_Resources );
+	void SetPumpSpeed( float p_Speed );
 
 	// Get functions
 	LDE::Vector2f GetPosition( ) const;
@@ -68,10 +70,13 @@ private:
 	float m_RotationSpeed;
 	int m_Resources;
 	int m_ResourcesMax;
+	float m_PumpSpeed;
+	int m_PumpMaxResources;
 	bool m_Loaded;
 
 	// Pump varaibles
-	std::vector< Pump* > m_Pumps;
+	Pump m_Pump;
+	//std::vector< Pump* > m_Pumps;
 
 };
 

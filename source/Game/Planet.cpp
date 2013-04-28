@@ -5,16 +5,10 @@
 
 // Constructors / destructors
 Planet::Planet( ) :
+	m_Position( 0.0f, 0.0f ),
+	m_Thickness( 1 ),
+	m_Size( 1 ),
 	m_pTexture( NULL ),
-	m_Loaded( false )
-{
-}
-
-Planet::Planet( LDE::Vector2f p_Position, float p_Size, float p_Thickness, LDE::Texture * p_pTexture ) :
-	m_Position( p_Position ),
-	m_Thickness( p_Thickness ),
-	m_Size( p_Size ),
-	m_pTexture( p_pTexture ),
 	m_Rotation( 0.0f ),
 	m_RotationSpeed( 0.0f ),
 	m_ResourcesMax( 1 ),
@@ -25,7 +19,7 @@ Planet::Planet( LDE::Vector2f p_Position, float p_Size, float p_Thickness, LDE::
 }
 Planet::~Planet( )
 {
-	ClearAllPumps( );
+	//ClearAllPumps( );
 }
 
 // Public general functions
@@ -43,8 +37,6 @@ bool Planet::Load( )
 		return false;
 	}
 
-
-
 	// Load the render object
 	m_RenderQuad1.SetPosition( m_Position );
 	m_RenderQuad1.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) );
@@ -57,8 +49,6 @@ bool Planet::Load( )
 	m_RenderQuad2.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) - LDE::Vector2f( m_Thickness, m_Thickness ) );
 	m_RenderQuad2.SetTexLowCoo( LDE::Vector2f( 0.0f, 0.0f ) );
 	m_RenderQuad2.SetTexHighCoo( LDE::Vector2f( 1.0f, 1.0f ) );
-
-
 
 	// Clear all the pumps
 	ClearAllPumps( );
@@ -136,10 +126,8 @@ void Planet::Render( )
 	glPopMatrix( );
 }
 
-bool Planet::AddNewPump( float p_Angle )
+bool Planet::SetPump( float p_Angle )
 {
-	Pump * pPump = new Pump( m_pTexture );
-
 	// Calculate the new real angle
 	p_Angle = p_Angle + m_Rotation;
 
@@ -148,16 +136,22 @@ bool Planet::AddNewPump( float p_Angle )
 	position = position * m_Size;
 
 	// Set the pump position
-	pPump->SetPosition( position );
-	pPump->SetColor( m_Color );
-	pPump->SetMaxSize( m_Size - m_Thickness );
-	pPump->SetTimeSpeed( 100.0f );
-	pPump->SetMaxResources( 500 );
-	
-	// Add the pump
-	m_Pumps.push_back( pPump );
+	m_Pump.SetTexture( m_pTexture );
+	m_Pump.SetPosition( position );
+	m_Pump.SetColor( m_Color );
+	m_Pump.SetMaxSize( m_Size - m_Thickness );
+	m_Pump.SetTimeSpeed( m_PumpSpeed );
+	m_Pump.SetResources( 1 );
+	m_Pump.SetMaxResources( m_PumpMaxResources );
+	m_Pump.SetActive( true );
+	m_Pump.RestartTickTimer( );
 
 	return true;
+}
+
+bool Planet::IsPumpActive( ) const
+{
+	return m_Pump.IsActive( );
 }
 
 // Set functions
@@ -166,6 +160,16 @@ void Planet::SetPosition( LDE::Vector2f p_Position )
 	m_Position = p_Position;
 	m_RenderQuad1.SetPosition( m_Position );
 	m_RenderQuad2.SetPosition( m_Position );
+}
+
+void Planet::SetTexture( LDE::Texture * p_pTexture )
+{
+	if( p_pTexture == NULL )
+	{
+		return;
+	}
+
+	m_pTexture = p_pTexture;
 }
 
 void Planet::SetSize( float p_Size )
@@ -181,6 +185,8 @@ void Planet::SetSize( float p_Size )
 void Planet::SetThickness( float p_Thickness )
 {
 	m_Thickness = p_Thickness;
+	m_RenderQuad2.SetVertLowCoo( LDE::Vector2f( -m_Size, -m_Size ) + LDE::Vector2f( m_Thickness, m_Thickness ) );
+	m_RenderQuad2.SetVertHighCoo( LDE::Vector2f( m_Size, m_Size ) - LDE::Vector2f( m_Thickness, m_Thickness ) );
 }
 
 void Planet::SetRotation( float p_Rotation )
@@ -204,9 +210,20 @@ void Planet::SetResources( int p_Resources )
 	m_Resources = p_Resources;
 }
 
+void Planet::SetPumpMaxResources( int p_Resources )
+{
+	m_PumpMaxResources = p_Resources;
+	m_Pump.SetMaxResources( m_PumpMaxResources );
+}
+
 void Planet::SetResourcesMax( int p_Resources )
 {
 	m_ResourcesMax = p_Resources;
+}
+
+void Planet::SetPumpSpeed( float p_Speed )
+{
+	m_PumpSpeed = p_Speed;
 }
 
 // Get functions
@@ -347,16 +364,18 @@ void Planet::UpdateAllPumps( )
 		return;
 	}
 
-	for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
+	//for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
+	//{
+	if( m_Pump.IsActive( ) )
 	{
-		float timer = m_Pumps[ i ]->GetTickTimer( );
+		float timer = m_Pump.GetTickTimer( );
 		if( timer >= 1.0f )
 		{
-			 m_Pumps[ i ]->RestartTickTimer( );
-			int numResources = (int)(timer);
+			m_Pump.RestartTickTimer( );
+			const int numResources = 1; //(int)(timer);
 			
 			// Increase the pump resources
-			m_Pumps[ i ]->IncreaseResources( numResources );
+			m_Pump.IncreaseResources( numResources );
 
 			// Decrease the planets resources
 			m_Resources -= numResources;
@@ -364,12 +383,13 @@ void Planet::UpdateAllPumps( )
 			if( m_Resources <= 0 )
 			{
 				m_Resources = 0;
-				break;
+				//break;
 			}
 
 		}
-
 	}
+
+	//}
 }
 
 void Planet::RenderPumps( )
@@ -378,20 +398,22 @@ void Planet::RenderPumps( )
 	//glPointSize( 20.0f );
 	//glBegin( GL_POINTS );
 
-	for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
-	{
-		m_Pumps[ i ]->Render( );
+	//for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
+	//{
+		//m_Pumps[ i ]->Render( );
 		//glVertex2f( m_Pumps[ i ]->GetPosition( ).x,
 			//m_Pumps[ i ]->GetPosition( ).y );
-	}
+	//}
 	//glEnd( );
+
+	m_Pump.Render( );
 }
 
 void Planet::ClearAllPumps( )
 {
-	for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
+	/*for( unsigned int i = 0; i < m_Pumps.size( ); i++ )
 	{
 		delete m_Pumps[ i ];
 	}
-	m_Pumps.clear( );
+	m_Pumps.clear( );*/
 }
