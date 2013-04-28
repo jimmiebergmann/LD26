@@ -288,7 +288,8 @@ LDE::Vector2f Planet::GetLocalPumpPosition( )
 LDE::Vector2f Planet::GetGlobalPumpPosition( )
 {
 	LDE::Vector2f position = LDE::RotateVector2f( LDE::Vector2f( 0.0f, 1.0f ), -m_PumpAngle + m_Rotation );
-	position = position * m_Pump.GetSize( );
+	position = position * m_Size;
+	position += m_Position;
 	return position;
 }
 

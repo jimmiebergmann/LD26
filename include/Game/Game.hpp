@@ -77,6 +77,7 @@ private:
 	float m_StartPlayerRadius;
 	float m_StartBulletSpeed;
 	float m_StartPumpSpeed;
+	float m_StartMaxPlanetRange;
 	LDE::Vector2f m_StartPlanetPosition;
 	LDE::Color m_StartPlanetColors[ PLANET_COUNT ];
 	float m_StartPlanetSizes[ PLANET_COUNT ];

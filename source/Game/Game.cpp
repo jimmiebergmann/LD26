@@ -170,9 +170,10 @@ void Game::LoadStartValues( )
 	m_StartPlayerPosition = LDE::Vector2f( -400.0f, -400.0f );
 	m_StartPlayerDirection = LDE::Vector2f( 0.0f, 1.0f );
 	m_StartPlayerColor = LDE::Color( 203, 203, 203 );
-	m_StartPlayerRadius = 30.0f;
+	m_StartPlayerRadius = 15.0f;
 	m_StartPumpSpeed = 100.0f;
 	m_StartBulletSpeed = 300.0f;
+	m_StartMaxPlanetRange = 1000.0f;
 
 	m_StartPlanetPosition = LDE::Vector2f( 0.0f, 0.0f );
 
@@ -180,22 +181,29 @@ void Game::LoadStartValues( )
 	m_StartPlanetColors[ 1 ] = LDE::Color( 192, 82, 78 );	// Red
 	m_StartPlanetColors[ 2 ] = LDE::Color( 80, 156, 190 );	// Blue
 
-	m_StartPlanetSizes[ 0 ] = 200;
+	m_StartPlanetSizes[ 0 ] = 250;
 	m_StartPlanetThicknesses[ 0 ] = 50;
 
-	m_StartPlanetSizes[ 1 ] = 250;
+	m_StartPlanetSizes[ 1 ] = 200;
 	m_StartPlanetThicknesses[ 1 ] = 50;
 
-	m_StartPlanetSizes[ 2 ] = 200;
+	m_StartPlanetSizes[ 2 ] = 150;
 	m_StartPlanetThicknesses[ 2 ] = 50;
 
 	m_StartPlanetMaxResources[ 0 ] = 100;
 	m_StartPlanetMaxResources[ 1 ] = 80;
 	m_StartPlanetMaxResources[ 2 ] = 60;
 
+	
 	m_StartPlanetRotationSpeed[ 0 ] = 40.0f;
 	m_StartPlanetRotationSpeed[ 1 ] = 120.0f;
 	m_StartPlanetRotationSpeed[ 2 ] = 140.0f;
+	
+/*
+	m_StartPlanetRotationSpeed[ 0 ] = 0.0f;
+	m_StartPlanetRotationSpeed[ 1 ] = 0.0f;
+	m_StartPlanetRotationSpeed[ 2 ] = 0.0f;
+*/
 
 }
 
@@ -356,11 +364,12 @@ int Game::Update( double p_DeltaTime )
 	// Add planet gravity if we are close enought
 	LDE::Vector2f planetDirection = m_Planets[ m_CurrPlanet ].GetPosition( ) - m_Player.GetPosition( );
 	float planetDistance = planetDirection.Magnitude( );
-	const float planetGravityStart = m_Planets[ m_CurrPlanet ].GetSize( ) * 4.5f;
+	const float planetGravityStart = m_Planets[ m_CurrPlanet ].GetSize( ) * 7.5f;
 
 	if( planetDistance <= planetGravityStart )
 	{
 		float gravityPower = 1.0f - ( planetDistance / planetGravityStart );
+		gravityPower /= 2.0f;
 		
 		LDE::Vector2f gravityVector = planetDirection.Normal( ) *
 			gravityPower * (m_Planets[ m_CurrPlanet ].GetSize( ) / 50.0f );
@@ -387,10 +396,23 @@ int Game::Update( double p_DeltaTime )
 	//std::cout << pumpPosition.x << "   " << pumpPosition.y << std::endl;
 
 	// Are we outside the navigation system? Then reset
-	if( planetDistance >= 1000.0f )
+	if( planetDistance >= m_StartMaxPlanetRange )
 	{
 		// We are lost!
 		ResetGame( );
+	}
+
+	// Is the current planet out of resources?
+	if( m_Planets[ m_CurrPlanet ].GetResources( ) == 0 )
+	{
+		if( m_CurrPlanet < PLANET_COUNT - 1 )
+		{
+			m_CurrPlanet++;
+
+			// Set the planet's start position to the pump's position
+			m_Planets[ m_CurrPlanet ].SetPosition( pumpPosition );
+
+		}
 	}
 
 
@@ -405,6 +427,8 @@ void Game::Render( )
 
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity( );
+
+	glPushMatrix( );
 
 	// Set up the camera
 	LDE::Vector2f cameraDiff = m_Player.GetPosition( ) - ( LDE::Vector2f( m_WindowSize ) / 2.0f );
@@ -424,6 +448,46 @@ void Game::Render( )
 	{
 		m_PumpBullets[ i ]->Render( );
 	}
+
+	glPopMatrix( );
+
+
+	// ///////////////////////////////////////////////////////
+	// Render a navigation system
+	static const LDE::Vector2f navSize( 160.0f, 60.0f );
+	glLineWidth( 2.0f );
+	glPointSize( 6.0f );
+	glPushMatrix( );
+	glTranslatef(  (navSize.x / 2.0f ) + 10.0f, (navSize.y / 2.0f ) + 10.0f, 0.0f );
+	
+	// Render the lines
+	glColor3f( m_Player.GetColor( ).r / 255.0f,
+		m_Player.GetColor( ).g / 255.0f, m_Player.GetColor( ).b / 255.0f );
+	
+	glBegin( GL_LINES );
+		glVertex2f( -navSize.x / 2.0f, 0.0f );
+		glVertex2f( navSize.x / 2.0f, 0.0f );
+
+		glVertex2f( 0.0f, -navSize.y / 2.0f );
+		glVertex2f( 0.0f, navSize.y / 2.0f );
+	glEnd( );
+
+	// Render the indicator
+	//glColor3f( 1.0f, 0.0f, 0.0f );
+	glBegin( GL_POINTS );
+
+
+	LDE::Vector2f diff = m_Player.GetPosition( ) - m_Planets[ m_CurrPlanet ].GetPosition( );
+	diff /= LDE::Vector2f( m_StartMaxPlanetRange, m_StartMaxPlanetRange );
+	diff *= navSize / 2.0f;
+
+	glVertex2f( diff.x, 0.0f );
+	glVertex2f( 0.0f, diff.y );
+
+	glEnd( );
+
+	glPopMatrix( );
+
 
 	// Swap all buffers
 	SDL_GL_SwapBuffers( );
